@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "OnlineAppointmentSystem": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
