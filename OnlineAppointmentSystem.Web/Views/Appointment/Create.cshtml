@@ -1,0 +1,119 @@
+@model OnlineAppointmentSystem.Web.Models.AppointmentViewModels.AppointmentCreateViewModel
+@{
+    ViewData["Title"] = "Randevu Oluþtur";
+}
+
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">@ViewData["Title"]</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="ServiceId"></label>
+                        <select asp-for="ServiceId" asp-items="Model.Services" class="form-control" id="serviceSelect">
+                            <option value="">Hizmet Seçiniz</option>
+                        </select>
+                        <span asp-validation-for="ServiceId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="EmployeeId"></label>
+                        <select asp-for="EmployeeId" asp-items="Model.Employees" class="form-control" id="employeeSelect">
+                            <option value="">Çalýþan Seçiniz</option>
+                        </select>
+                        <span asp-validation-for="EmployeeId" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="AppointmentDate"></label>
+                        <input asp-for="AppointmentDate" class="form-control" id="appointmentDate" />
+                        <span asp-validation-for="AppointmentDate" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="AppointmentTime"></label>
+                        <input asp-for="AppointmentTime" class="form-control" id="appointmentTime" />
+                        <span asp-validation-for="AppointmentTime" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="Notes"></label>
+                <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Notes" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Randevu Oluþtur</button>
+                <a asp-action="Index" class="btn btn-secondary">Ýptal</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            // Hizmet seçildiðinde çalýþanlarý getir
+            $('#serviceSelect').change(function () {
+                var serviceId = $(this).val();
+                if (serviceId) {
+                    $.ajax({
+                        url: '@Url.Action("GetEmployeesByService")',
+                        type: 'GET',
+                        data: { serviceId: serviceId },
+                        success: function (data) {
+                            var employeeSelect = $('#employeeSelect');
+                            employeeSelect.empty();
+                            employeeSelect.append($('<option></option>').val('').text('Çalýþan Seçiniz'));
+                            $.each(data, function (i, item) {
+                                employeeSelect.append($('<option></option>').val(item.id).text(item.name));
+                            });
+                        }
+                    });
+                }
+            });
+
+            // Tarih, saat ve çalýþan seçildiðinde müsaitlik kontrolü
+            $('#appointmentDate, #appointmentTime, #employeeSelect').change(function () {
+                checkAvailability();
+            });
+
+            function checkAvailability() {
+                var employeeId = $('#employeeSelect').val();
+                var date = $('#appointmentDate').val();
+                var time = $('#appointmentTime').val();
+                var serviceId = $('#serviceSelect').val();
+
+                if (employeeId && date && time && serviceId) {
+                    $.ajax({
+                        url: '@Url.Action("CheckAvailability")',
+                        type: 'GET',
+                        data: {
+                            employeeId: employeeId,
+                            date: date,
+                            time: time,
+                            serviceId: serviceId
+                        },
+                        success: function (data) {
+                            if (!data.available) {
+                                alert('Seçilen tarih ve saatte randevu alýnamaz. Lütfen baþka bir zaman seçiniz.');
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+}

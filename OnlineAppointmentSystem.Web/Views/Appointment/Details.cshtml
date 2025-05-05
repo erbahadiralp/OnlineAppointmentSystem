@@ -1,0 +1,72 @@
+@model OnlineAppointmentSystem.Entity.DTOs.AppointmentDTO
+@{
+    ViewData["Title"] = "Randevu Detaylarý";
+}
+
+<div class="card">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">@ViewData["Title"]</h4>
+        <div>
+            <a asp-action="Index" class="btn btn-light">Listeye Dön</a>
+            @if (Model.Status == OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Pending)
+            {
+                <a asp-action="Edit" asp-route-id="@Model.AppointmentId" class="btn btn-warning">Düzenle</a>
+                <a asp-action="Cancel" asp-route-id="@Model.AppointmentId" class="btn btn-danger">Ýptal Et</a>
+            }
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5 class="border-bottom pb-2">Randevu Bilgileri</h5>
+                <dl class="row">
+                    <dt class="col-sm-4">Randevu No:</dt>
+                    <dd class="col-sm-8">@Model.AppointmentId</dd>
+                    <dt class="col-sm-4">Tarih:</dt>
+                    <dd class="col-sm-8">@Model.AppointmentDate.ToString("dd.MM.yyyy HH:mm")</dd>
+                    <dt class="col-sm-4">Durum:</dt>
+                    <dd class="col-sm-8">
+                        @{
+                            string badgeClass = Model.Status switch
+                            {
+                                OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Pending => "badge-warning",
+                                OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Confirmed => "badge-success",
+                                OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Completed => "badge-info",
+                                OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Cancelled => "badge-danger",
+                                _ => "badge-secondary"
+                            };
+                        }
+                        <span class="badge @badgeClass">@Model.StatusName</span>
+                    </dd>
+                    <dt class="col-sm-4">Oluþturulma:</dt>
+                    <dd class="col-sm-8">@Model.CreatedDate.ToString("dd.MM.yyyy HH:mm")</dd>
+                    @if (Model.UpdatedDate.HasValue)
+                    {
+                        <dt class="col-sm-4">Güncelleme:</dt>
+                        <dd class="col-sm-8">@Model.UpdatedDate.Value.ToString("dd.MM.yyyy HH:mm")</dd>
+                    }
+                </dl>
+            </div>
+            <div class="col-md-6">
+                <h5 class="border-bottom pb-2">Hizmet Bilgileri</h5>
+                <dl class="row">
+                    <dt class="col-sm-4">Hizmet:</dt>
+                    <dd class="col-sm-8">@Model.ServiceName</dd>
+                    <dt class="col-sm-4">Çalýþan:</dt>
+                    <dd class="col-sm-8">@Model.EmployeeName</dd>
+                    <dt class="col-sm-4">Müþteri:</dt>
+                    <dd class="col-sm-8">@Model.CustomerName</dd>
+                </dl>
+            </div>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.Notes))
+        {
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <h5 class="border-bottom pb-2">Notlar</h5>
+                    <p>@Model.Notes</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>

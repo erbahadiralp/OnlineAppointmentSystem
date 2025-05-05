@@ -32,5 +32,11 @@ namespace OnlineAppointmentSystem.Entity.DTOs
         public string Notes { get; set; }
 
         public bool ReminderSent { get; set; }
+
+        [Display(Name = "Created Date")]
+        public DateTime CreatedDate { get; set; }
+
+        [Display(Name = "Updated Date")]
+        public DateTime? UpdatedDate { get; set; }
     }
 }

@@ -1,0 +1,78 @@
+@model IEnumerable<OnlineAppointmentSystem.Entity.DTOs.ServiceDTO>
+@{
+    ViewData["Title"] = "Ana Sayfa";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Hastane Randevu Sistemine Hoþ Geldiniz</h1>
+    <p>Saðlýk hizmetlerimiz için online randevu alabilirsiniz.</p>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Hizmetlerimiz</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    @foreach (var service in Model)
+                    {
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">@service.ServiceName</h5>
+                                    <p class="card-text">@service.Description</p>
+                                    <p class="card-text"><small class="text-muted">Süre: @service.Duration dakika</small></p>
+                                    <p class="card-text"><strong>Fiyat: @service.Price.ToString("C")</strong></p>
+                                </div>
+                                <div class="card-footer">
+                                    @if (User.Identity.IsAuthenticated)
+                                    {
+                                        <a asp-controller="Appointments" asp-action="Create" class="btn btn-primary btn-block">Randevu Al</a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary btn-block">Giriþ Yaparak Randevu Alabilirsiniz</a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Neden Bizi Seçmelisiniz?</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i> Uzman doktor kadrosu</li>
+                    <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i> Modern týbbi cihazlar</li>
+                    <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i> Hýzlý ve kolay randevu sistemi</li>
+                    <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i> 7/24 hasta desteði</li>
+                    <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i> Uygun fiyatlar</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Ýletiþim Bilgileri</h5>
+            </div>
+            <div class="card-body">
+                <p><i class="bi bi-geo-alt-fill me-2"></i> Adres: Örnek Mahallesi, Örnek Caddesi No:123, Ýstanbul</p>
+                <p><i class="bi bi-telephone-fill me-2"></i> Telefon: (0212) 123 45 67</p>
+                <p><i class="bi bi-envelope-fill me-2"></i> E-posta: info@hastanerandevu.com</p>
+                <p><i class="bi bi-clock-fill me-2"></i> Çalýþma Saatleri: Hafta içi 08:00 - 18:00, Cumartesi 09:00 - 14:00</p>
+            </div>
+        </div>
+    </div>
+</div>
