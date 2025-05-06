@@ -13,9 +13,9 @@ a {
 }
 
 .btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    color: #000;
+    background-color: rgba(249, 250, 251, 0.8); /* %80 opaklık */
+    border-color: rgba(249, 250, 251, 1);
 }
 
 .nav-pills .nav-link.active, .nav-pills .show > .nav-link {

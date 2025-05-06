@@ -22,6 +22,17 @@ namespace OnlineAppointmentSystem.Web.Controllers
             return View(services);
         }
 
+        public async Task<IActionResult> Service()
+        {
+            var services = await _serviceService.GetActiveServicesAsync();
+            return View(services);
+        }
+
+        public async Task<IActionResult> Employee()
+        {
+            var services = await _serviceService.GetActiveServicesAsync();
+            return View(services);
+        }
         public IActionResult Privacy()
         {
             return View();

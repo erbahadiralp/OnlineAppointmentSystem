@@ -36,8 +36,10 @@ $(document).ready(function () {
 
     // Format time inputs
     $('.time-picker').timepicker({
-        minuteStep: 15,
-        showMeridian: false,
-        defaultTime: '09:00'
+        timeFormat: 'HH:mm',
+        stepMinute: 15,
+        hourMin: 8,
+        hourMax: 18
     });
+
 });

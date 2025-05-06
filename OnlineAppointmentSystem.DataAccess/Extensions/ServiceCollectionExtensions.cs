@@ -1,8 +1,6 @@
 ﻿using OnlineAppointmentSystem.DataAccess.Abstract;
 using OnlineAppointmentSystem.DataAccess.Cache;
 using OnlineAppointmentSystem.DataAccess.Concrete.EntityFramework;
-using OnlineAppointmentSystem.Entity.Concrete;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,22 +12,13 @@ namespace OnlineAppointmentSystem.DataAccess.Extensions
     {
         public static IServiceCollection AddDataAccessServices(this IServiceCollection services, IConfiguration configuration)
         {
-            // DbContext
+            // DbContext - Program.cs'de zaten yapılandırıldığı için kaldırabilirsiniz
+            // veya burada bırakıp Program.cs'den kaldırabilirsiniz
             services.AddDbContext<OnlineAppointmentSystemDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-            // Identity
-            services.AddIdentity<AppUser, IdentityRole>(options =>
-            {
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequiredLength = 8;
-                options.User.RequireUniqueEmail = true;
-            })
-            .AddEntityFrameworkStores<OnlineAppointmentSystemDbContext>()
-            .AddDefaultTokenProviders();
+            // Identity yapılandırmasını kaldırıyoruz - Bu Program.cs'de yapılmalı
+            // services.AddIdentity<AppUser, IdentityRole>... - BU KISMI KALDIRIN
 
             // Repositories
             services.AddScoped<IAppointmentRepository, AppointmentRepository>();

@@ -1,0 +1,95 @@
+
+/* Custom variables */
+:root {
+  --color-purple: #8B5CF6;
+  --color-purple-dark: #7C3AED;
+  --color-purple-light: #A78BFA;
+  --color-purple-bg: #F5F3FF;
+}
+
+/* Utility classes */
+.text-purple {
+  color: var(--color-purple);
+}
+
+.bg-purple {
+  background-color: var(--color-purple);
+}
+
+.hover\:bg-purple-dark:hover {
+  background-color: var(--color-purple-dark);
+}
+
+.border-purple {
+  border-color: var(--color-purple);
+}
+
+/* Tab button styling */
+.tab-button {
+  position: relative;
+  border-bottom: 2px solid transparent;
+}
+
+.tab-button.active {
+  border-bottom-color: var(--color-purple);
+  color: var(--color-purple);
+}
+
+.filter-button.active {
+  background-color: var(--color-purple);
+  color: white;
+}
+
+.filter-button:not(.active) {
+  background-color: #e5e7eb;
+  color: #4b5563;
+}
+
+/* Tab pane visibility */
+.tab-pane {
+  display: none;
+}
+
+.tab-pane.active {
+  display: block;
+}
+
+/* Animation utilities */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Toast animation */
+@keyframes slideIn {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slideOut {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+#toast {
+  transition: transform 0.3s ease;
+}
+
+#toast:not(.translate-y-full) {
+  transform: translateY(0);
+}
+
+/* Custom focus styles */
+*:focus-visible {
+  outline: 2px solid var(--color-purple);
+  outline-offset: 2px;
+}
+
+/* Dialog fixes */
+body.overflow-hidden {
+  overflow: hidden;
+}

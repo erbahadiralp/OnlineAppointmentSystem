@@ -13,9 +13,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Add DbContext
-builder.Services.AddDbContext<OnlineAppointmentSystemDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// DbContext yapılandırması DataAccess.Extensions'da yapıldığı için burada kaldırıldı
+// builder.Services.AddDbContext<OnlineAppointmentSystemDbContext>...
+
+// DataAccess katmanını kaydet - DbContext ve Repository'leri içerir
+builder.Services.AddDataAccessServices(builder.Configuration);
+
+// Business katmanını kaydet
+builder.Services.AddBusinessServices();
 
 // Add Identity
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
@@ -38,12 +43,6 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
     options.ExpireTimeSpan = TimeSpan.FromDays(7);
 });
-
-// DataAccess katmanını kaydet
-builder.Services.AddDataAccessServices(builder.Configuration);
-
-// Business katmanını kaydet
-builder.Services.AddBusinessServices();
 
 // Background servisleri kaydet
 builder.Services.AddHostedService<AppointmentReminderService>();

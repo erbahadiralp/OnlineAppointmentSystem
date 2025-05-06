@@ -22,18 +22,18 @@
                     </div>
                     <select name="StatusFilter" class="form-control mr-2 mb-2" onchange="this.form.submit()">
                         <option value="">Tüm Durumlar</option>
-                        <option value="Pending" @(Model.StatusFilter == "Pending" ? "selected" : "")>Bekliyor</option>
-                        <option value="Confirmed" @(Model.StatusFilter == "Confirmed" ? "selected" : "")>Onaylandý</option>
-                        <option value="Completed" @(Model.StatusFilter == "Completed" ? "selected" : "")>Tamamlandý</option>
-                        <option value="Cancelled" @(Model.StatusFilter == "Cancelled" ? "selected" : "")>Ýptal Edildi</option>
+                        <option value="Pending" selected="@(Model.StatusFilter == "Pending")">Bekliyor</option>
+                        <option value="Confirmed" selected="@(Model.StatusFilter == "Confirmed")">Onaylandý</option>
+                        <option value="Completed" selected="@(Model.StatusFilter == "Completed")">Tamamlandý</option>
+                        <option value="Cancelled" selected="@(Model.StatusFilter == "Cancelled")">Ýptal Edildi</option>
                     </select>
                     <select name="DateFilter" class="form-control mr-2 mb-2" onchange="this.form.submit()">
                         <option value="">Tüm Tarihler</option>
-                        <option value="Today" @(Model.DateFilter == "Today" ? "selected" : "")>Bugün</option>
-                        <option value="Tomorrow" @(Model.DateFilter == "Tomorrow" ? "selected" : "")>Yarýn</option>
-                        <option value="ThisWeek" @(Model.DateFilter == "ThisWeek" ? "selected" : "")>Bu Hafta</option>
-                        <option value="NextWeek" @(Model.DateFilter == "NextWeek" ? "selected" : "")>Gelecek Hafta</option>
-                        <option value="ThisMonth" @(Model.DateFilter == "ThisMonth" ? "selected" : "")>Bu Ay</option>
+                        <option value="Today" selected="@(Model.DateFilter == "Today")">Bugün</option>
+                        <option value="Tomorrow" selected="@(Model.DateFilter == "Tomorrow")">Yarýn</option>
+                        <option value="ThisWeek" selected="@(Model.DateFilter == "ThisWeek")">Bu Hafta</option>
+                        <option value="NextWeek" selected="@(Model.DateFilter == "NextWeek")">Gelecek Hafta</option>
+                        <option value="ThisMonth" selected="@(Model.DateFilter == "ThisMonth")">Bu Ay</option>
                     </select>
                     <button type="submit" class="btn btn-primary mb-2">Filtrele</button>
                     <a asp-action="Index" class="btn btn-outline-secondary mb-2 ml-2">Filtreleri Temizle</a>
