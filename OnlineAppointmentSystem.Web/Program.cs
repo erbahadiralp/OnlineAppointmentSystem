@@ -20,9 +20,6 @@ builder.Logging.AddEventSourceLogger();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// DbContext yapılandırması DataAccess.Extensions'da yapıldığı için burada kaldırıldı
-// builder.Services.AddDbContext<OnlineAppointmentSystemDbContext>...
-
 // DataAccess katmanını kaydet - DbContext ve Repository'leri içerir
 builder.Services.AddDataAccessServices(builder.Configuration);
 

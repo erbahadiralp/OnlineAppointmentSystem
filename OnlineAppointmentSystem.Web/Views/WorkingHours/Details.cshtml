@@ -1,0 +1,34 @@
+﻿@model OnlineAppointmentSystem.Entity.DTOs.WorkingHoursDTO
+
+@{
+    ViewData["Title"] = "Detaylar";
+}
+
+<h2>Çalışma Saati Detayları</h2>
+
+<div class="form-group">
+    <label>Çalışan:</label>
+    <p>@Model.EmployeeName</p>
+</div>
+
+<div class="form-group">
+    <label>Gün:</label>
+    <p>@Model.DayName</p>
+</div>
+
+<div class="form-group">
+    <label>Başlangıç Saati:</label>
+    <p>@Model.StartTime</p>
+</div>
+
+<div class="form-group">
+    <label>Bitiş Saati:</label>
+    <p>@Model.EndTime</p>
+</div>
+
+<div class="form-group">
+    <label>Aktif mi?</label>
+    <p>@(Model.IsActive ? "Evet" : "Hayır")</p>
+</div>
+
+<a asp-action="Index" class="btn btn-secondary">Geri Dön</a>

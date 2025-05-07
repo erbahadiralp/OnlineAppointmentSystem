@@ -1,0 +1,26 @@
+﻿@model OnlineAppointmentSystem.Entity.DTOs.EmployeeDTO
+@{
+    ViewData["Title"] = "Çalışanı Sil";
+}
+
+<h2>Çalışanı Sil</h2>
+
+<h4>Bu çalışanı silmek istediğinizden emin misiniz?</h4>
+
+<dl class="row">
+    <dt class="col-sm-3">Ad Soyad</dt>
+    <dd class="col-sm-9">@Model.FirstName @Model.LastName</dd>
+
+    <dt class="col-sm-3">Email</dt>
+    <dd class="col-sm-9">@Model.Email</dd>
+
+    <dt class="col-sm-3">Departman</dt>
+    <dd class="col-sm-9">@Model.Department</dd>
+</dl>
+
+<form asp-action="DeleteConfirmed" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="EmployeeId" />
+    <button type="submit" class="btn btn-danger">Sil</button>
+    <a asp-action="Index" class="btn btn-secondary">İptal</a>
+</form>

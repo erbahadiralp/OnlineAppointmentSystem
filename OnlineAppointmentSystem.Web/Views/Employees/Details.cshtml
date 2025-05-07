@@ -1,0 +1,41 @@
+﻿@model OnlineAppointmentSystem.Entity.DTOs.EmployeeDTO
+@{
+    ViewData["Title"] = "Çalışan Detayları";
+}
+
+<h2>Çalışan Detayları</h2>
+
+<dl class="row">
+    <dt class="col-sm-3">Ad Soyad</dt>
+    <dd class="col-sm-9">@Model.FirstName @Model.LastName</dd>
+
+    <dt class="col-sm-3">Email</dt>
+    <dd class="col-sm-9">@Model.Email</dd>
+
+    <dt class="col-sm-3">Telefon</dt>
+    <dd class="col-sm-9">@Model.PhoneNumber</dd>
+
+    <dt class="col-sm-3">Departman</dt>
+    <dd class="col-sm-9">@Model.Department</dd>
+
+    <dt class="col-sm-3">Ünvan</dt>
+    <dd class="col-sm-9">@Model.Title</dd>
+
+    <dt class="col-sm-3">Durum</dt>
+    <dd class="col-sm-9">@((Model.IsActive) ? "Aktif" : "Pasif")</dd>
+
+    <dt class="col-sm-3">Hizmetler</dt>
+    <dd class="col-sm-9">
+        @if (Model.ServiceNames != null)
+        {
+            <ul>
+                @foreach (var s in Model.ServiceNames)
+                {
+                    <li>@s</li>
+                }
+            </ul>
+        }
+    </dd>
+</dl>
+
+<a asp-action="Index" class="btn btn-secondary">Geri Dön</a>
