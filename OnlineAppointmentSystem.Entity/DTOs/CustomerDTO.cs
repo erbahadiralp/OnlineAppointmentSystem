@@ -35,5 +35,8 @@ namespace OnlineAppointmentSystem.Entity.DTOs
 
         [StringLength(10, ErrorMessage = "Gender cannot exceed 10 characters")]
         public string Gender { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
     }
 }

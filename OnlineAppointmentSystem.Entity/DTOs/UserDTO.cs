@@ -30,5 +30,7 @@ namespace OnlineAppointmentSystem.Entity.DTOs
         public string Role { get; set; }
 
         public bool HasEmployeeProfile { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
     }
 }

@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNet.Identity;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using OnlineAppointmentSystem.Business.Abstract;
 using OnlineAppointmentSystem.Entity.DTOs;
 using OnlineAppointmentSystem.Web.Models.AccountViewModels;
@@ -13,11 +13,16 @@ namespace OnlineAppointmentSystem.Web.Controllers
     {
         private readonly IAuthService _authService;
         private readonly IUserService _userService;
+        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(IAuthService authService, IUserService userService)
+        public AccountController(
+            IAuthService authService,
+            IUserService userService,
+            ILogger<AccountController> logger)
         {
             _authService = authService;
             _userService = userService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -43,22 +48,30 @@ namespace OnlineAppointmentSystem.Web.Controllers
                     RememberMe = model.RememberMe
                 };
 
-                var result = await _authService.LoginAsync(loginDTO);
-                if (result != null)
+                try
                 {
-                    if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    var result = await _authService.LoginAsync(loginDTO);
+                    if (result != null)
                     {
-                        return Redirect(returnUrl);
+                        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                        {
+                            return Redirect(returnUrl);
+                        }
+                        else
+                        {
+                            return RedirectToAction(nameof(HomeController.Index), "Home");
+                        }
                     }
                     else
                     {
-                        return RedirectToAction(nameof(HomeController.Index), "Home");
+                        ModelState.AddModelError(string.Empty, "Geçersiz giriş denemesi.");
+                        return View(model);
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    ModelState.AddModelError(string.Empty, "Geçersiz giriş denemesi.");
-                    return View(model);
+                    _logger.LogError(ex, "Giriş sırasında hata oluştu");
+                    ModelState.AddModelError(string.Empty, "Giriş sırasında bir hata oluştu. Lütfen daha sonra tekrar deneyin.");
                 }
             }
 
@@ -72,6 +85,7 @@ namespace OnlineAppointmentSystem.Web.Controllers
             return View();
         }
 
+
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -79,25 +93,46 @@ namespace OnlineAppointmentSystem.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var registerDTO = new RegisterDTO
+                try
                 {
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                    Email = model.Email,
-                    PhoneNumber = model.PhoneNumber,
-                    Address = model.Address,
-                    Password = model.Password,
-                    Role = model.Role
-                };
+                    var registerDTO = new RegisterDTO
+                    {
+                        FirstName = model.FirstName,
+                        LastName = model.LastName,
+                        Email = model.Email,
+                        PhoneNumber = model.PhoneNumber,
+                        Address = model.Address,
+                        Password = model.Password,
+                        Role = model.Role
+                    };
 
-                var result = await _authService.RegisterAsync(registerDTO);
-                if (result)
-                {
-                    return RedirectToAction(nameof(Login));
+                    var success = await _authService.RegisterAsync(registerDTO);
+                    if (success)
+                    {
+                        _logger.LogInformation("Kullanıcı başarıyla kaydedildi.");
+                        return RedirectToAction(nameof(Login));
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Kullanıcı kaydı başarısız oldu.");
+                        ModelState.AddModelError(string.Empty, "Kayıt işlemi başarısız oldu. Email adresi zaten kullanılıyor olabilir.");
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    ModelState.AddModelError(string.Empty, "Kayıt işlemi başarısız oldu.");
+                    _logger.LogError(ex, "Kayıt sırasında hata oluştu");
+                    ModelState.AddModelError(string.Empty, "Kayıt sırasında bir hata oluştu. Lütfen daha sonra tekrar deneyin.");
+                }
+            }
+            else
+            {
+                // Model doğrulama hatalarını logla
+                foreach (var modelState in ModelState.Values)
+                {
+                    foreach (var error in modelState.Errors)
+                    {
+                        _logger.LogWarning($"Model doğrulama hatası: {error.ErrorMessage}");
+                    }
                 }
             }
 

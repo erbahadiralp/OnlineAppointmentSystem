@@ -10,6 +10,13 @@ using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+// Loglama yapılandırması
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+builder.Logging.AddEventSourceLogger();
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -23,6 +30,8 @@ builder.Services.AddDataAccessServices(builder.Configuration);
 builder.Services.AddBusinessServices();
 
 // Add Identity
+
+// Add Identity
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
     options.Password.RequireDigit = true;
@@ -30,9 +39,14 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
     options.Password.RequireUppercase = true;
     options.Password.RequireNonAlphanumeric = true;
     options.Password.RequiredLength = 8;
+    options.User.RequireUniqueEmail = true; // Bu ayar önemli
+    
+    // Kullanıcı adı ve email için normalizasyon ayarları
+    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
 })
 .AddEntityFrameworkStores<OnlineAppointmentSystemDbContext>()
 .AddDefaultTokenProviders();
+
 
 // Configure Identity
 builder.Services.ConfigureApplicationCookie(options =>
