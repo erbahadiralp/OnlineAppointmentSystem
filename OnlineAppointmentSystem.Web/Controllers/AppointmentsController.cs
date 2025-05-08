@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNet.Identity;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using OnlineAppointmentSystem.Business.Abstract;
@@ -8,6 +7,7 @@ using OnlineAppointmentSystem.Entity.Enums;
 using OnlineAppointmentSystem.Web.Models.AppointmentViewModels;
 using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace OnlineAppointmentSystem.Web.Controllers
@@ -37,7 +37,8 @@ namespace OnlineAppointmentSystem.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var userId = User.FindFirst("UserId")?.Value;
+            // User.FindFirst("UserId") yerine ClaimTypes.NameIdentifier kullanıyoruz
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
                 return RedirectToAction("Login", "Account");
@@ -65,7 +66,8 @@ namespace OnlineAppointmentSystem.Web.Controllers
 
         public async Task<IActionResult> Create()
         {
-            var userId = User.FindFirst("UserId")?.Value;
+            // User.FindFirst("UserId") yerine ClaimTypes.NameIdentifier kullanıyoruz
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
                 return RedirectToAction("Login", "Account");
@@ -91,7 +93,8 @@ namespace OnlineAppointmentSystem.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var userId = User.FindFirst("UserId")?.Value;
+                // User.FindFirst("UserId") yerine ClaimTypes.NameIdentifier kullanıyoruz
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (string.IsNullOrEmpty(userId))
                 {
                     return RedirectToAction("Login", "Account");

@@ -17,7 +17,7 @@ namespace OnlineAppointmentSystem.Entity.Concrete
         public DateTime? DateOfBirth { get; set; }
 
         [StringLength(10)]
-        public string Gender { get; set; }
+        public string? Gender { get; set; }
 
         public DateTime CreatedDate { get; set; }
 

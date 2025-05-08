@@ -5,6 +5,7 @@ using OnlineAppointmentSystem.Business.Abstract;
 using OnlineAppointmentSystem.Entity.DTOs;
 using OnlineAppointmentSystem.Web.Models.AccountViewModels;
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace OnlineAppointmentSystem.Web.Controllers
@@ -29,6 +30,12 @@ namespace OnlineAppointmentSystem.Web.Controllers
         [AllowAnonymous]
         public IActionResult Login(string returnUrl = null)
         {
+            // Eğer kullanıcı zaten giriş yapmışsa, ana sayfaya yönlendir
+            if (User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
@@ -53,6 +60,8 @@ namespace OnlineAppointmentSystem.Web.Controllers
                     var result = await _authService.LoginAsync(loginDTO);
                     if (result != null)
                     {
+                        _logger.LogInformation($"Kullanıcı başarıyla giriş yaptı: {model.Email}");
+
                         if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                         {
                             return Redirect(returnUrl);
@@ -64,6 +73,7 @@ namespace OnlineAppointmentSystem.Web.Controllers
                     }
                     else
                     {
+                        _logger.LogWarning($"Geçersiz giriş denemesi: {model.Email}");
                         ModelState.AddModelError(string.Empty, "Geçersiz giriş denemesi.");
                         return View(model);
                     }
@@ -84,7 +94,6 @@ namespace OnlineAppointmentSystem.Web.Controllers
         {
             return View();
         }
-
 
         [HttpPost]
         [AllowAnonymous]
@@ -151,19 +160,30 @@ namespace OnlineAppointmentSystem.Web.Controllers
         [Authorize]
         public async Task<IActionResult> Profile()
         {
-            var userId = User.FindFirst("UserId")?.Value;
-            if (string.IsNullOrEmpty(userId))
+            try
             {
-                return RedirectToAction(nameof(Login));
-            }
+                // Identity'nin sağladığı UserId'yi kullan
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    _logger.LogWarning("Kullanıcı ID'si bulunamadı");
+                    return RedirectToAction(nameof(Login));
+                }
 
-            var user = await _userService.GetUserByIdAsync(userId);
-            if (user == null)
+                var user = await _userService.GetUserByIdAsync(userId);
+                if (user == null)
+                {
+                    _logger.LogWarning($"Kullanıcı bulunamadı: {userId}");
+                    return NotFound();
+                }
+
+                return View(user);
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                _logger.LogError(ex, "Profil sayfası yüklenirken hata oluştu");
+                return RedirectToAction("Error", "Home");
             }
-
-            return View(user);
         }
     }
 }

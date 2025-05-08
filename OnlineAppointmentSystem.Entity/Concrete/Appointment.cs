@@ -24,7 +24,7 @@ namespace OnlineAppointmentSystem.Entity.Concrete
 
         public AppointmentStatus Status { get; set; }
 
-        public string Notes { get; set; }
+        public string? Notes { get; set; }
 
         public DateTime CreatedDate { get; set; }
 
