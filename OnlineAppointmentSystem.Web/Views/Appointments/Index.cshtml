@@ -1,0 +1,142 @@
+@model OnlineAppointmentSystem.Web.Models.AppointmentViewModels.AppointmentListViewModel
+@{
+    ViewData["Title"] = "Randevular";
+}
+
+<div class="container appointments-container">
+    <div class="row mb-4 align-items-center">
+        <div class="col">
+            <h2 class="display-6 fw-bold mb-1 text-primary">@ViewData["Title"]</h2>
+            <div class="text-muted mb-2" style="font-size:1.1rem;">Tüm randevularınızı görüntüleyin, yönetin ve yeni randevu oluşturun.</div>
+        </div>
+        @if (User.IsInRole("Customer"))
+        {
+            <div class="col-auto text-end">
+                <a asp-action="Create" class="btn btn-primary btn-lg px-4">
+                    <i class="bi bi-plus-circle me-1"></i> Yeni Randevu
+                </a>
+            </div>
+        }
+    </div>
+
+    <div class="card mb-4 filter-card shadow-sm border-0 rounded-4">
+        <div class="card-body py-3">
+            <form asp-action="Index" method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <input asp-for="SearchTerm" class="form-control form-control-lg" placeholder="Ara..." />
+                </div>
+                <div class="col-md-3">
+                    <select asp-for="StatusFilter" asp-items="@(new SelectList(Enum.GetValues(typeof(OnlineAppointmentSystem.Entity.Enums.AppointmentStatus))))" class="form-select form-select-lg">
+                        <option value="">Tüm Durumlar</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input asp-for="DateFilter" type="date" class="form-control form-control-lg" />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-primary btn-lg w-100">
+                        <i class="bi bi-funnel me-1"></i> Filtrele
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (!Model.Appointments.Any())
+    {
+        <div class="empty-state-card card border-0 shadow-sm rounded-4 text-center py-5 my-5">
+            <div class="card-body">
+                <i class="bi bi-calendar-x display-3 text-muted mb-3"></i>
+                <h4 class="mb-2">Henüz randevu bulunmamaktadır.</h4>
+                <p class="text-muted mb-0">Yeni bir randevu oluşturmak için sağ üstteki butonu kullanabilirsiniz.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle appointments-table">
+                <thead class="table-light">
+                    <tr>
+                        <th>Tıbbi Birim</th>
+                        <th>Doktor</th>
+                        <th>Randevu Tarihi</th>
+                        <th>Durum</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Appointments)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@item.ServiceName</td>
+                            <td>Dr. @item.EmployeeName</td>
+                            <td><i class="bi bi-calendar-event me-1"></i>@item.AppointmentDate.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>
+                                @switch (item.Status)
+                                {
+                                    case OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Pending:
+                                        <span class="badge rounded-pill bg-warning text-dark">Beklemede</span>
+                                        break;
+                                    case OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Confirmed:
+                                        <span class="badge rounded-pill bg-success">Onaylandı</span>
+                                        break;
+                                    case OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Cancelled:
+                                        <span class="badge rounded-pill bg-danger">İptal Edildi</span>
+                                        break;
+                                    case OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Completed:
+                                        <span class="badge rounded-pill bg-info text-dark">Tamamlandı</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a asp-action="Details" asp-route-id="@item.AppointmentId" class="btn btn-sm btn-outline-info" title="Detaylar">
+                                        <i class="bi bi-info-circle"></i>
+                                    </a>
+                                    @if (User.IsInRole("Employee"))
+                                    {
+                                        @if (item.Status == OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Pending)
+                                        {
+                                            <form asp-action="Confirm" asp-route-id="@item.AppointmentId" method="post" style="display: inline;">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-outline-success" title="Onayla">
+                                                    <i class="bi bi-check-circle"></i>
+                                                </button>
+                                            </form>
+                                            <form asp-action="Cancel" asp-route-id="@item.AppointmentId" method="post" style="display: inline;">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="İptal Et">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        @if (item.Status == OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Confirmed)
+                                        {
+                                            <form asp-action="Complete" asp-route-id="@item.AppointmentId" method="post" style="display: inline;">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-outline-primary" title="Tamamla">
+                                                    <i class="bi bi-check2-all"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    }
+                                    @if (User.IsInRole("Customer") && (item.Status != OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Cancelled && item.Status != OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Completed))
+                                    {
+                                        
+                                        <form asp-action="Cancel" asp-route-id="@item.AppointmentId" method="post" style="display: inline;">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="İptal Et">
+                                                <i class="bi bi-x-circle"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

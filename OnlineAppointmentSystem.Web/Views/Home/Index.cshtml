@@ -1,0 +1,100 @@
+@model IEnumerable<OnlineAppointmentSystem.Entity.DTOs.ServiceDTO>
+@{
+    ViewData["Title"] = "Ana Sayfa";
+}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="hero-title">Sağlığınız İçin<br>Yanınızdayız</h1>
+                <p class="hero-subtitle">Hızlı ve kolay bir şekilde doktor randevularınızı yönetin. Modern sağlık hizmetlerine tek tıkla ulaşın.</p>
+                <div class="d-flex gap-3">
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-light btn-lg px-4">
+                        Giriş Yap
+                    </a>
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light btn-lg px-4">
+                        Hasta Kaydı
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block">
+                <img src="~/images/hero-image.svg" alt="Healthcare" class="img-fluid" />
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="container py-5">
+    <div class="row g-4">
+        <!-- Kolay Randevu Oluşturma -->
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+                <h3 class="feature-title">Kolay Randevu Oluşturma</h3>
+                <p class="feature-description">Birkaç tıklama ile hızlıca doktor randevunuzu oluşturun ve yönetin. Size en uygun zamanı seçin.</p>
+            </div>
+        </div>
+
+        <!-- Hatırlatmalar -->
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-bell"></i>
+                </div>
+                <h3 class="feature-title">Akıllı Hatırlatmalar</h3>
+                <p class="feature-description">Randevu öncesi SMS ve e-posta hatırlatmaları ile hiçbir doktor randevunuzu kaçırmayın.</p>
+            </div>
+        </div>
+
+        <!-- Doktor Yönetimi -->
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+                <h3 class="feature-title">Uzman Doktorlar</h3>
+                <p class="feature-description">Alanında uzman doktorlarımız ile sağlığınız güvende. Detaylı doktor profilleri ve değerlendirmeler.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="container py-5">
+    <div class="row g-4 text-center">
+        <div class="col-md-4">
+            <div class="feature-card">
+                <h2 class="text-gradient display-4 fw-bold mb-2">50+</h2>
+                <p class="feature-description">Uzman Doktor</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card">
+                <h2 class="text-gradient display-4 fw-bold mb-2">10+</h2>
+                <p class="feature-description">Tıbbi Birim</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card">
+                <h2 class="text-gradient display-4 fw-bold mb-2">1000+</h2>
+                <p class="feature-description">Mutlu Hasta</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="container py-5">
+    <div class="feature-card text-center p-5">
+        <h2 class="mb-4">Hemen Randevu Alın</h2>
+        <p class="feature-description mb-4">Sağlığınız için ilk adımı atın. Hemen online randevu oluşturun.</p>
+        <a asp-controller="Home" asp-action="Service" class="btn btn-primary btn-lg px-5">
+            Randevu Al
+        </a>
+    </div>
+</section>

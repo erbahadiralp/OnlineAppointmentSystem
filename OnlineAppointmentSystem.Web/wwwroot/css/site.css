@@ -1,0 +1,906 @@
+﻿/* Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
+for details on configuring this project to bundle and minify static web assets. */
+
+/* Global Styles */
+:root {
+    --primary-color: #2563eb;
+    --secondary-color: #4f46e5;
+    --accent-color: #7c3aed;
+    --text-color: #1f2937;
+    --light-text: #6b7280;
+    --background-color: #f9fafb;
+    --card-background: #ffffff;
+    --border-color: #e5e7eb;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    line-height: 1.6;
+}
+
+/* Navbar Styles */
+.navbar {
+    background-color: var(--card-background) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--primary-color) !important;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: var(--text-color) !important;
+    padding: 0.5rem 1rem !important;
+    transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+    color: var(--primary-color) !important;
+}
+
+/* Homepage Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 6rem 0;
+    margin-bottom: 4rem;
+    border-radius: 0 0 2rem 2rem;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+}
+
+/* Feature Cards */
+.feature-card {
+    background: var(--card-background);
+    border-radius: 1rem;
+    padding: 1.1rem 0.8rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    transition: transform 0.3s, box-shadow 0.3s;
+    min-height: 90px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.10);
+}
+.feature-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #fff;
+}
+
+.feature-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+.feature-description {
+    color: var(--light-text);
+    font-size: 1rem;
+}
+
+.display-5 {
+    font-size: 2rem;
+}
+
+/* Buttons */
+.btn-primary {
+    background: var(--primary-color);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+    background: var(--secondary-color);
+    transform: translateY(-1px);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-section {
+        padding: 4rem 0;
+    }
+    
+    .feature-card {
+        padding: 0.7rem 0.4rem;
+        min-height: 60px;
+    }
+    .feature-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    .display-5 {
+        font-size: 1.2rem;
+    }
+}
+
+/* Utility Classes */
+.text-gradient {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.shadow-soft {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.rounded-xl {
+    border-radius: 1rem;
+}
+
+/* Animation Classes */
+.hover-lift {
+    transition: transform 0.2s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--background-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-color);
+}
+
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+.border-top {
+    border-top: 1px solid #e5e5e5;
+}
+
+.border-bottom {
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.box-shadow {
+    box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+}
+
+button.accept-policy {
+    font-size: 1rem;
+    line-height: inherit;
+}
+
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+    position: relative;
+    min-height: 100vh;
+}
+
+body {
+    margin-bottom: 60px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    line-height: 60px;
+    background-color: #f8fafc;
+    border-top: 1px solid #e5e7eb;
+}
+
+/* Custom styles */
+.card {
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    font-weight: bold;
+}
+
+.btn-group {
+    white-space: nowrap;
+}
+
+.table th {
+    background-color: #343a40;
+    color: white;
+}
+
+.badge {
+    font-size: 90%;
+}
+
+.badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.badge-info {
+    background-color: #0dcaf0;
+    color: #fff;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+}
+
+.badge-secondary {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+/* Home/Employee.cshtml custom styles */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+}
+.hero-section {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+}
+.service-card {
+    background: var(--card-background);
+    border-radius: 1rem;
+    padding: 1.25rem 1.5rem 1.5rem 1.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+.service-header {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+.service-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.service-icon i {
+    font-size: 1.3rem;
+    color: white;
+}
+.service-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+.doctor-list {
+    margin-top: 0.5rem;
+}
+.doctor-badge {
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    min-width: 180px;
+    transition: box-shadow 0.2s;
+}
+.doctor-badge:hover {
+    box-shadow: 0 6px 18px rgba(79,70,229,0.10);
+}
+.doctor-avatar {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7rem;
+    color: #fff;
+}
+.doctor-avatar i {
+    color: #fff;
+    font-size: 1.2rem;
+}
+@media (max-width: 768px) {
+    .doctor-badge {
+        min-width: 140px;
+        font-size: 0.95rem;
+    }
+    .service-card {
+        padding: 1rem;
+    }
+    .doctor-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 1.1rem;
+    }
+}
+
+/* Login & Register custom styles */
+.login-bg {
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), #f9fafb 80%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.login-card {
+    border-radius: 1.5rem;
+    box-shadow: 0 8px 32px rgba(79,70,229,0.10);
+    background: var(--card-background);
+}
+.login-icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.5rem auto;
+}
+.login-icon i {
+    color: #fff;
+    font-size: 2.2rem;
+}
+.form-label {
+    font-weight: 500;
+}
+.form-control-lg {
+    border-radius: 0.75rem;
+    font-size: 1.1rem;
+    padding: 0.75rem 1rem;
+}
+.btn-primary {
+    font-weight: 600;
+    font-size: 1.1rem;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+}
+.btn-primary:focus {
+    box-shadow: 0 0 0 0.2rem rgba(37,99,235,0.15);
+}
+.text-primary {
+    color: var(--primary-color) !important;
+}
+@media (max-width: 768px) {
+    .login-card {
+        padding: 0.5rem;
+    }
+    .login-bg {
+        padding: 1rem 0;
+    }
+}
+
+/* Footer custom styles */
+.footer-custom {
+    background: #f8fafc;
+    border-top: 1px solid #e5e7eb;
+    color: #6b7280;
+    font-size: 0.97rem;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.03);
+}
+.footer-custom .bi {
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    vertical-align: -0.1em;
+}
+@media (max-width: 768px) {
+    .footer-custom {
+        font-size: 0.93rem;
+        padding: 0.7rem 0;
+    }
+}
+
+/* Customer Dashboard upcoming appointment styles */
+.upcoming-appointment-card {
+    background: linear-gradient(135deg, #f1f5ff 60%, #e0e7ff 100%);
+    border-left: 6px solid var(--primary-color);
+    margin-bottom: 1.5rem;
+}
+.upcoming-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #fff;
+}
+@media (max-width: 768px) {
+    .upcoming-appointment-card {
+        padding: 0.5rem 0.5rem;
+    }
+    .upcoming-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.3rem;
+    }
+}
+
+/* Dashboard container min-height for sticky footer */
+.dashboard-container {
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+@media (max-width: 768px) {
+    .dashboard-container {
+        min-height: 60vh;
+    }
+}
+
+/* Appointments/Index custom styles */
+.appointments-container {
+    padding-bottom: 2rem;
+    margin-top: 2.5rem;
+    min-height: 65vh;
+}
+.filter-card {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+}
+.appointments-table th, .appointments-table td {
+    vertical-align: middle;
+}
+.appointments-table th {
+    font-weight: 600;
+    color: var(--primary-color);
+    background: #f1f5f9;
+    border-bottom: 2px solid #e5e7eb;
+}
+.appointments-table tr {
+    transition: background 0.15s;
+}
+.appointments-table tr:hover {
+    background: #f1f5ff;
+}
+.badge {
+    font-size: 1em;
+    letter-spacing: 0.01em;
+}
+.empty-state-card {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    min-height: 220px;
+}
+@media (max-width: 768px) {
+    .appointments-container {
+        padding-bottom: 1rem;
+        margin-top: 1.2rem;
+        min-height: 55vh;
+    }
+    .appointments-table th, .appointments-table td {
+        font-size: 0.97rem;
+    }
+    .filter-card {
+        padding: 0.5rem;
+    }
+}
+
+/* Appointments/Details custom styles */
+.appointment-details-container {
+    margin-top: 2.5rem;
+    margin-bottom: 2.5rem;
+}
+.appointment-details-card {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+}
+.appointment-details-card h5 {
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+.appointment-details-card ul {
+    font-size: 1.08rem;
+}
+.appointment-details-card .badge {
+    font-size: 1em;
+    letter-spacing: 0.01em;
+}
+@media (max-width: 768px) {
+    .appointment-details-container {
+        margin-top: 1.2rem;
+        margin-bottom: 1.2rem;
+    }
+    .appointment-details-card ul {
+        font-size: 0.98rem;
+    }
+}
+
+/* Appointments/Create custom styles */
+.appointment-create-container {
+    margin-top: 2.5rem;
+    margin-bottom: 2.5rem;
+}
+.appointment-create-card {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+}
+.appointment-create-card h5 {
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+.appointment-create-card label {
+    font-weight: 500;
+}
+.appointment-create-card .form-control-lg, .appointment-create-card .form-select-lg {
+    border-radius: 0.75rem;
+    font-size: 1.08rem;
+    padding: 0.75rem 1rem;
+}
+@media (max-width: 768px) {
+    .appointment-create-container {
+        margin-top: 1.2rem;
+        margin-bottom: 1.2rem;
+    }
+    .appointment-create-card .form-control-lg, .appointment-create-card .form-select-lg {
+        font-size: 0.98rem;
+    }
+}
+
+/* Account/Profile custom styles */
+.profile-container {
+    margin-top: 2.5rem;
+    margin-bottom: 2.5rem;
+}
+.profile-card {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+}
+.profile-avatar {
+    width: 90px;
+    height: 90px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: #fff;
+}
+.profile-card .badge {
+    font-size: 1em;
+    letter-spacing: 0.01em;
+}
+@media (max-width: 768px) {
+    .profile-container {
+        margin-top: 1.2rem;
+        margin-bottom: 1.2rem;
+    }
+    .profile-avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+    }
+}
+
+/* Employee Dashboard Styles */
+.employee-dashboard-container {
+    padding: 2rem 0;
+    flex: 1;
+    margin-bottom: 2rem;
+}
+
+.dashboard-tabs {
+    border-bottom: 2px solid var(--border-color);
+}
+
+.dashboard-tabs .nav-link {
+    border: none;
+    color: var(--text-muted);
+    font-weight: 500;
+    padding: 1rem 1.5rem;
+    position: relative;
+    transition: all 0.3s ease;
+    background: none;
+}
+
+.dashboard-tabs .nav-link:hover {
+    color: var(--primary-color);
+    background: none;
+}
+
+.dashboard-tabs .nav-link.active {
+    color: var(--primary-color);
+    background: none;
+    border: none;
+}
+
+.dashboard-tabs .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--primary-color);
+}
+
+.tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    padding: 0 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 1rem;
+    margin-left: 0.5rem;
+    color: white;
+}
+
+.tab-badge.bg-danger {
+    background-color: #dc3545;
+}
+
+.tab-badge.bg-purple {
+    background-color: #6f42c1;
+}
+
+.tab-badge.bg-info {
+    background-color: #0dcaf0;
+}
+
+/* Appointment Card Styles */
+.appointment-card {
+    background: var(--card-bg);
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.appointment-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.appointment-card .card-header {
+    background: none;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.25rem;
+}
+
+.appointment-card .card-body {
+    padding: 1.25rem;
+}
+
+.appointment-card .appointment-time {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.appointment-card .appointment-status {
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.appointment-card .appointment-status.pending {
+    background-color: var(--warning-bg);
+    color: var(--warning-color);
+}
+
+.appointment-card .appointment-status.confirmed {
+    background-color: var(--success-bg);
+    color: var(--success-color);
+}
+
+.appointment-card .appointment-status.cancelled {
+    background-color: var(--danger-bg);
+    color: var(--danger-color);
+}
+
+.appointment-card .appointment-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.appointment-card .btn-action {
+    flex: 1;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.appointment-card .btn-action:hover {
+    transform: translateY(-2px);
+}
+
+/* Empty State Styles */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-muted);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--border-color);
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+    margin-bottom: 0;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .dashboard-tabs .nav-link {
+        padding: 0.7rem 0.7rem;
+        font-size: 0.95rem;
+    }
+    
+    .appointment-card .card-header,
+    .appointment-card .card-body {
+        padding: 1rem;
+    }
+    
+    .appointment-card .appointment-time {
+        font-size: 1.1rem;
+    }
+}
+
+/* Departman badge alanı */
+.department-badges {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+}
+.department-badges .badge {
+    font-size: 0.92em;
+    padding: 0.35em 0.7em;
+    border-radius: 1rem;
+    font-weight: 500;
+    margin-right: 0.1rem;
+}
+
+/* Tablo içi küçük butonlar hizalama ve boyut */
+.table .btn-group .btn,
+.table .btn-group form .btn {
+    min-width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.6rem !important;
+    margin-right: 4px;
+    font-size: 1.15rem;
+}
+.table .btn-group .btn:last-child,
+.table .btn-group form .btn:last-child {
+    margin-right: 0;
+}
+.table .btn-group form {
+    display: inline-block;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .table .btn-group .btn,
+    .table .btn-group form .btn {
+        min-width: 30px;
+        height: 30px;
+        font-size: 1rem;
+    }
+}
+
+/* Saat seçim butonları için modern ve düzgün grid */
+#availableTimes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+#availableTimes .time-btn {
+    min-width: 90px;
+    min-height: 48px;
+    font-size: 1.15rem;
+    border-radius: 12px;
+    border: 2px solid #2563eb;
+    color: #2563eb;
+    background: #fff;
+    transition: all 0.2s;
+    font-weight: 500;
+    text-align: center;
+    flex: 1 0 21%; /* 4-5 buton yan yana için */
+    box-sizing: border-box;
+}
+#availableTimes .time-btn.active,
+#availableTimes .time-btn:focus {
+    background: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+}
+@media (max-width: 600px) {
+    #availableTimes .time-btn {
+        min-width: 70px;
+        font-size: 1rem;
+        flex: 1 0 45%;
+    }
+}

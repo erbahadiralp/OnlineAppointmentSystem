@@ -1,0 +1,82 @@
+﻿@model IEnumerable<OnlineAppointmentSystem.Entity.DTOs.ServiceDTO>
+@{
+    ViewData["Title"] = "Tıbbi Birimler";
+}
+<div class="container py-4 dashboard-container">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <h2 class="fw-bold mb-0">@ViewData["Title"]</h2>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Yeni Tıbbi Birim
+        </a>
+    </div>
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">Kayıtlı tıbbi birim bulunamadı.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Adı</th>
+                        <th scope="col">Açıklama</th>
+                        <th scope="col">Fiyat</th>
+                        <th scope="col">Süre (dk)</th>
+                        <th scope="col">Durum</th>
+                        <th scope="col" class="text-end">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var service in Model)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@service.ServiceName</td>
+                            <td class="text-muted">@service.Description</td>
+                            <td><span class="badge badge-success">@service.Price.ToString("C")</span></td>
+                            <td><span class="badge badge-info">@service.Duration</span></td>
+                            <td>
+                                @if (service.IsActive)
+                                {
+                                    <span class="badge badge-success">Aktif</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-secondary">Pasif</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a asp-action="Edit" asp-route-id="@service.ServiceId" class="btn btn-outline-primary" title="Düzenle">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@service.ServiceId" class="btn btn-outline-danger" title="Sil">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                    @if (service.IsActive)
+                                    {
+                                        <form asp-action="Deactivate" asp-route-id="@service.ServiceId" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-warning" title="Pasifleştir">
+                                                <i class="bi bi-toggle-off"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="Activate" asp-route-id="@service.ServiceId" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-success" title="Aktifleştir">
+                                                <i class="bi bi-toggle-on"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

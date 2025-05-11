@@ -1,0 +1,35 @@
+﻿@model OnlineAppointmentSystem.Entity.DTOs.WorkingHoursDTO
+
+@{
+    ViewData["Title"] = "Çalışma Saati Detayları";
+}
+<div class="container py-4 d-flex justify-content-center align-items-center min-vh-80">
+    <div class="appointment-create-card p-4 shadow rounded-3" style="max-width: 520px; width:100%">
+        <div class="d-flex align-items-center mb-3">
+            <div class="feature-icon me-3">
+                <i class="bi bi-clock-history"></i>
+            </div>
+            <div>
+                <h3 class="fw-bold mb-0">Çalışma Saati Detayları</h3>
+                <div class="text-muted small">@Model.EmployeeName</div>
+            </div>
+        </div>
+        <dl class="row mb-3">
+            <dt class="col-sm-5">Gün</dt>
+            <dd class="col-sm-7"><i class="bi bi-calendar-week me-1"></i>@Model.DayName</dd>
+            <dt class="col-sm-5">Başlangıç Saati</dt>
+            <dd class="col-sm-7"><i class="bi bi-clock me-1"></i>@Model.StartTime</dd>
+            <dt class="col-sm-5">Bitiş Saati</dt>
+            <dd class="col-sm-7"><i class="bi bi-clock me-1"></i>@Model.EndTime</dd>
+            <dt class="col-sm-5">Aktif</dt>
+            <dd class="col-sm-7">
+                <span class="badge @(Model.IsActive ? "badge-success" : "badge-secondary")">@(Model.IsActive ? "Evet" : "Hayır")</span>
+            </dd>
+        </dl>
+        <div class="d-flex justify-content-end mt-3">
+            <a asp-action="Index" class="btn btn-outline-secondary btn-lg px-4">
+                <i class="bi bi-arrow-left me-1"></i> Geri Dön
+            </a>
+        </div>
+    </div>
+</div>

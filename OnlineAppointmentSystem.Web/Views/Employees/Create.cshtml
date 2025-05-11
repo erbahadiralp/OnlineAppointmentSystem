@@ -1,0 +1,118 @@
+﻿@model OnlineAppointmentSystem.Web.Models.EmployeeViewModels.EmployeeCreateViewModel
+
+@{
+    ViewData["Title"] = "Yeni Çalışan Ekle";
+}
+<div class="container py-4 d-flex justify-content-center align-items-center min-vh-80">
+    <div class="appointment-create-card p-4 shadow rounded-3" style="max-width: 600px; width:100%">
+        <div class="d-flex align-items-center mb-3">
+            <div class="feature-icon me-3">
+                <i class="bi bi-person-plus"></i>
+            </div>
+            <div>
+                <h3 class="fw-bold mb-0">Yeni Çalışan Ekle</h3>
+                <div class="text-muted small">Sisteme yeni bir çalışan ekleyin</div>
+            </div>
+        </div>
+        <form asp-action="Create" method="post" class="mt-3">
+            <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="FirstName" class="form-label">Ad</label>
+                    <input asp-for="FirstName" class="form-control form-control-lg" />
+                    <span asp-validation-for="FirstName" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="LastName" class="form-label">Soyad</label>
+                    <input asp-for="LastName" class="form-control form-control-lg" />
+                    <span asp-validation-for="LastName" class="text-danger small"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Email" class="form-label">E-posta</label>
+                    <input asp-for="Email" class="form-control form-control-lg" type="email" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="PhoneNumber" class="form-label">Telefon</label>
+                    <input asp-for="PhoneNumber" class="form-control form-control-lg" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Address" class="form-label">Adres</label>
+                <textarea asp-for="Address" class="form-control form-control-lg" rows="2"></textarea>
+                <span asp-validation-for="Address" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Role" class="form-label">Rol <span class="text-danger">*</span></label>
+                <select asp-for="Role" class="form-select form-select-lg" id="roleSelect">
+                    <option value="">Lütfen rol seçin</option>
+                    <option value="Employee">Doktor</option>
+                    <option value="Admin">Admin</option>
+                </select>
+                <span asp-validation-for="Role" class="text-danger small"></span>
+            </div>
+            <div id="employeeFields">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Title" class="form-label">Unvan</label>
+                        <input asp-for="Title" class="form-control form-control-lg" placeholder="Örn: Uzman Doktor, Prof. Dr." />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Department" class="form-label">Departman</label>
+                        <input asp-for="Department" class="form-control form-control-lg" placeholder="Örn: Kardiyoloji, Nöroloji" />
+                        <span asp-validation-for="Department" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="ServiceId" class="form-label">Verebileceği Hizmet <span class="text-danger">*</span></label>
+                    <select asp-for="ServiceId" asp-items="Model.Services" class="form-select form-select-lg">
+                        <option value="">Lütfen bir hizmet seçin</option>
+                    </select>
+                    <span asp-validation-for="ServiceId" class="text-danger small"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Password" class="form-label">Şifre</label>
+                    <input asp-for="Password" class="form-control form-control-lg" type="password" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="ConfirmPassword" class="form-label">Şifre Tekrar</label>
+                    <input asp-for="ConfirmPassword" class="form-control form-control-lg" type="password" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                </div>
+            </div>
+            <div class="d-flex gap-2 justify-content-end mt-3">
+                <button type="submit" class="btn btn-success btn-lg px-4">
+                    <i class="bi bi-check-circle me-1"></i> Kaydet
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary btn-lg px-4">
+                    <i class="bi bi-x-circle me-1"></i> İptal
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function toggleEmployeeFields() {
+            var role = document.getElementById('roleSelect').value;
+            var employeeFields = document.getElementById('employeeFields');
+            if (role === 'Employee') {
+                employeeFields.style.display = '';
+            } else {
+                employeeFields.style.display = 'none';
+            }
+        }
+        document.getElementById('roleSelect').addEventListener('change', toggleEmployeeFields);
+        // Sayfa yüklendiğinde ilk durumu ayarla
+        toggleEmployeeFields();
+    </script>
+}

@@ -1,0 +1,59 @@
+@model OnlineAppointmentSystem.Entity.DTOs.UserDTO
+@{
+    ViewData["Title"] = "Profil";
+}
+
+<div class="container profile-container">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4 rounded-3" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row mb-4">
+        <div class="col text-center">
+            <div class="display-6 fw-bold text-primary mb-2">
+                <i class="bi bi-person-circle me-2"></i>Profil Bilgileriniz
+            </div>
+            <div class="text-muted mb-2" style="font-size:1.1rem;">Kişisel bilgilerinizi ve randevularınızı buradan görüntüleyebilirsiniz.</div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 profile-card">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="profile-avatar mx-auto mb-2">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+                        <h3 class="fw-bold mb-0">@Model.FirstName @Model.LastName</h3>
+                        <span class="badge bg-primary mb-2">@Model.Role</span>
+                    </div>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item"><i class="bi bi-envelope me-2"></i><span class="fw-semibold">E-posta:</span> @Model.Email</li>
+                        <li class="list-group-item"><i class="bi bi-telephone me-2"></i><span class="fw-semibold">Telefon:</span> @Model.PhoneNumber</li>
+                        <li class="list-group-item"><i class="bi bi-geo-alt me-2"></i><span class="fw-semibold">Adres:</span> @Model.Address</li>
+                    </ul>
+                    <div class="d-flex justify-content-between flex-wrap gap-2 mt-4">
+                        <a asp-action="ProfileEdit" class="btn btn-primary">
+                            <i class="bi bi-pencil-square me-1"></i> Profili Düzenle
+                        </a>
+                        <a asp-action="ChangePassword" class="btn btn-warning">
+                            <i class="bi bi-key me-1"></i> Şifre Değiştir
+                        </a>
+                    </div>
+                    <div class="d-grid gap-2 mt-3">
+                        <a asp-controller="Appointments" asp-action="Index" class="btn btn-outline-info">
+                            <i class="bi bi-calendar-check me-1"></i> Tüm Randevularım
+                        </a>
+                        <a asp-controller="Appointments" asp-action="Create" class="btn btn-success">
+                            <i class="bi bi-plus-circle me-1"></i> Yeni Randevu Al
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

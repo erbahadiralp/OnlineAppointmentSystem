@@ -1,0 +1,61 @@
+﻿@model IEnumerable<OnlineAppointmentSystem.Entity.DTOs.WorkingHoursDTO>
+
+@{
+    ViewData["Title"] = "Çalışma Saatleri";
+}
+<div class="container py-4 dashboard-container">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <h2 class="fw-bold mb-0">@ViewData["Title"]</h2>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Yeni Çalışma Saati Ekle
+        </a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Çalışan</th>
+                    <th>Gün</th>
+                    <th>Başlangıç</th>
+                    <th>Bitiş</th>
+                    <th>Aktif</th>
+                    <th class="text-end">İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.EmployeeName</td>
+                        <td>@item.DayName</td>
+                        <td>@item.StartTime</td>
+                        <td>@item.EndTime</td>
+                        <td>
+                            @if (item.IsActive)
+                            {
+                                <span class="badge badge-success">Evet</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary">Hayır</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a asp-action="Details" asp-route-id="@item.WorkingHoursId" class="btn btn-outline-info" title="Detay">
+                                    <i class="bi bi-info-circle"></i>
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@item.WorkingHoursId" class="btn btn-outline-primary" title="Düzenle">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@item.WorkingHoursId" class="btn btn-outline-danger" title="Sil">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

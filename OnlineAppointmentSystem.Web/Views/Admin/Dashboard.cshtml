@@ -1,0 +1,152 @@
+@model OnlineAppointmentSystem.Web.Models.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Yönetici Dashboard";
+}
+<div class="container py-4 dashboard-container">
+    <div class="row mb-4 g-3">
+        <div class="col-md-4">
+            <div class="feature-card d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="feature-title">Toplam Randevu</div>
+                    <div class="display-5 fw-bold">@Model.TotalAppointments</div>
+                </div>
+                <div class="feature-icon bg-gradient-primary">
+                    <i class="bi bi-calendar2-check"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="feature-title">Doktor Sayısı</div>
+                    <div class="display-5 fw-bold">@Model.TotalDoctors</div>
+                </div>
+                <div class="feature-icon bg-gradient-primary">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="feature-title">Departman Sayısı</div>
+                    <div class="display-5 fw-bold">@Model.TotalDepartments</div>
+                </div>
+                <div class="feature-icon bg-gradient-primary">
+                    <i class="bi bi-layers"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <ul class="nav nav-tabs dashboard-tabs mb-4" id="adminDashboardTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="appointments-tab" data-bs-toggle="tab" data-bs-target="#appointments" type="button" role="tab" aria-controls="appointments" aria-selected="true">
+                Randevular
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="doctors-tab" data-bs-toggle="tab" data-bs-target="#doctors" type="button" role="tab" aria-controls="doctors" aria-selected="false">
+                Doktorlar
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="departments-tab" data-bs-toggle="tab" data-bs-target="#departments" type="button" role="tab" aria-controls="departments" aria-selected="false">
+                Departmanlar
+            </button>
+        </li>
+    </ul>
+    <div class="tab-content" id="adminDashboardTabContent">
+        <div class="tab-pane fade show active" id="appointments" role="tabpanel" aria-labelledby="appointments-tab">
+            <div class="row g-4">
+                @if (Model.Appointments.Any())
+                {
+                    @foreach (var appt in Model.Appointments.OrderByDescending(a => a.AppointmentDate).Take(12))
+                    {
+                        <div class="col-md-6 col-lg-4">
+                            <div class="appointment-card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <div class="appointment-time">
+                                        <i class="bi bi-clock me-2"></i>
+                                        @appt.AppointmentDate.ToString("dd MMM yyyy HH:mm")
+                                    </div>
+                                    <span class="appointment-status @appt.Status.ToString().ToLower()">
+                                        @appt.StatusName
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title mb-2">@appt.ServiceName</h5>
+                                    <p class="card-text mb-1"><i class="bi bi-person-badge me-2"></i>Doktor: @appt.EmployeeName</p>
+                                    <p class="card-text mb-1"><i class="bi bi-person me-2"></i>Hasta: @appt.CustomerName</p>
+                                    @if (!string.IsNullOrEmpty(appt.Notes))
+                                    {
+                                        <p class="card-text mb-2"><i class="bi bi-chat-left-text me-2"></i>@appt.Notes</p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12 text-center text-muted">Kayıtlı randevu bulunamadı.</div>
+                }
+            </div>
+        </div>
+        <div class="tab-pane fade" id="doctors" role="tabpanel" aria-labelledby="doctors-tab">
+            <div class="row g-4">
+                @if (Model.Doctors.Any())
+                {
+                    @foreach (var doc in Model.Doctors)
+                    {
+                        <div class="col-md-6 col-lg-4">
+                            <div class="feature-card h-100">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="doctor-avatar me-3">
+                                        <i class="bi bi-person-circle"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">@doc.FirstName @doc.LastName</div>
+                                        <div class="text-muted small">@doc.Title</div>
+                                    </div>
+                                </div>
+                                <div class="mb-1"><i class="bi bi-envelope me-2"></i>@doc.Email</div>
+                                <div class="mb-1"><i class="bi bi-telephone me-2"></i>@doc.PhoneNumber</div>
+                                <div class="mb-1"><i class="bi bi-building me-2"></i>@doc.Department</div>
+                                <span class="badge @(doc.IsActive ? "badge-success" : "badge-secondary")">@(doc.IsActive ? "Aktif" : "Pasif")</span>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12 text-center text-muted">Kayıtlı doktor bulunamadı.</div>
+                }
+            </div>
+        </div>
+        <div class="tab-pane fade" id="departments" role="tabpanel" aria-labelledby="departments-tab">
+            <div class="row g-4">
+                @if (Model.Departments.Any())
+                {
+                    @foreach (var dep in Model.Departments)
+                    {
+                        <div class="col-md-6 col-lg-4">
+                            <div class="feature-card h-100">
+                                <div class="fw-bold mb-2">@dep.ServiceName</div>
+                                <div class="mb-1 text-muted small">@dep.Description</div>
+                                <div class="mb-1"><i class="bi bi-person-badge me-2"></i>Doktor Sayısı: @(dep.Employees != null ? dep.Employees.Count : 0)</div>
+                                <div class="department-badges">
+                                    <span class="badge badge-info">Süre: @dep.Duration dk</span>
+                                    <span class="badge @(dep.IsActive ? "badge-success" : "badge-secondary")">@((dep.IsActive) ? "Aktif" : "Pasif")</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12 text-center text-muted">Kayıtlı departman bulunamadı.</div>
+                }
+            </div>
+        </div>
+    </div>
+</div> 

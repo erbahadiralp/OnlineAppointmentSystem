@@ -1,0 +1,56 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model List<OnlineAppointmentSystem.Entity.DTOs.ServiceDTO>
+
+@{
+    ViewData["Title"] = "Hekimlerimiz";
+}
+
+<!-- Hero Section -->
+<section class="hero-section bg-gradient-primary text-white py-3 mb-4">
+    <div class="container text-center">
+        <h1 class="display-6 fw-bold mb-2">Hekimlerimiz</h1>
+    </div>
+</section>
+
+<section class="container pb-4">
+    <div class="row g-4">
+        @foreach (var service in Model)
+        {
+            <div class="col-12">
+                <div class="service-card mb-3">
+                    <div class="service-header d-flex align-items-center mb-2">
+                        <div class="service-icon me-2">
+                            <i class="bi bi-hospital"></i>
+                        </div>
+                        <h3 class="service-title mb-0">@service.ServiceName</h3>
+                    </div>
+                    <div class="service-body">
+                        @if (service.Employees != null && service.Employees.Any())
+                        {
+                            <div class="doctor-list d-flex flex-wrap gap-3">
+                                @foreach (var doctor in service.Employees)
+                                {
+                                    <div class="doctor-badge d-flex align-items-center p-2 px-3">
+                                        <div class="doctor-avatar me-2">
+                                            <i class="bi bi-person-circle"></i>
+                                        </div>
+                                        <div>
+                                            <span class="fw-semibold">@doctor.FirstName @doctor.LastName</span><br />
+                                            <span class="text-muted small">@doctor.Title</span>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Bu birimde henüz doktor bulunmamaktadır.</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>

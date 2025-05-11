@@ -1,0 +1,56 @@
+@{
+    ViewData["Title"] = "Bildirim Testi";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Bildirim Test Ekranı</h2>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success">
+                            @TempData["Success"]
+                        </div>
+                    }
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">
+                            @TempData["Error"]
+                        </div>
+                    }
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card mb-3">
+                                <div class="card-header bg-info text-white">
+                                    <h4 class="mb-0">E-posta Testi</h4>
+                                </div>
+                                <div class="card-body">
+                                    <form asp-action="SendTestEmail" asp-controller="Home" method="post">
+                                        <div class="mb-3">
+                                            <label for="email" class="form-label">E-posta Adresi</label>
+                                            <input type="email" class="form-control" id="email" name="email" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">E-posta Gönder</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="alert alert-info mb-0">
+                        <h5>Bilgi</h5>
+                        <p>Bu ekran, SendGrid entegrasyonunu test etmek için kullanılır.</p>
+                        <p><strong>Not:</strong> Gerçek servise bağlantı vardır, test için kullanırken dikkatli olunuz.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

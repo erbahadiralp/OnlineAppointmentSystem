@@ -1,0 +1,104 @@
+@model OnlineAppointmentSystem.Entity.DTOs.AppointmentDTO
+@{
+    ViewData["Title"] = "Randevu Detayları";
+}
+
+<div class="container appointment-details-container">
+    <div class="row mb-4">
+        <div class="col text-center">
+            <div class="display-6 fw-bold text-primary mb-2">
+                <i class="bi bi-calendar-check me-2"></i>Randevu Detayları
+            </div>
+            <div class="text-muted mb-2" style="font-size:1.1rem;">Randevunuza ait tüm detayları aşağıda bulabilirsiniz.</div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-4 appointment-details-card">
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <h5 class="mb-3 text-primary"><i class="bi bi-info-circle me-2"></i>Randevu Bilgileri</h5>
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2"><i class="bi bi-calendar-event me-1"></i><span class="fw-semibold">Tarih:</span> @Model.AppointmentDate.ToString("dd.MM.yyyy HH:mm")</li>
+                                <li class="mb-2"><i class="bi bi-flag me-1"></i><span class="fw-semibold">Durum:</span> 
+                                    @switch (Model.Status)
+                                    {
+                                        case OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Pending:
+                                            <span class="badge rounded-pill bg-warning text-dark">Beklemede</span>
+                                            break;
+                                        case OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Confirmed:
+                                            <span class="badge rounded-pill bg-success">Onaylandı</span>
+                                            break;
+                                        case OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Cancelled:
+                                            <span class="badge rounded-pill bg-danger">İptal Edildi</span>
+                                            break;
+                                        case OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Completed:
+                                            <span class="badge rounded-pill bg-info text-dark">Tamamlandı</span>
+                                            break;
+                                    }
+                                </li>
+                                <li class="mb-2"><i class="bi bi-clock-history me-1"></i><span class="fw-semibold">Oluşturulma:</span> @Model.CreatedDate.ToString("dd.MM.yyyy HH:mm")</li>
+                                @if (Model.UpdatedDate.HasValue)
+                                {
+                                    <li class="mb-2"><i class="bi bi-arrow-repeat me-1"></i><span class="fw-semibold">Güncelleme:</span> @Model.UpdatedDate.Value.ToString("dd.MM.yyyy HH:mm")</li>
+                                }
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="mb-3 text-primary"><i class="bi bi-person-badge me-2"></i>Kişi Bilgileri</h5>
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2"><i class="bi bi-person me-1"></i><span class="fw-semibold">Hasta:</span> @Model.CustomerName</li>
+                                <li class="mb-2"><i class="bi bi-person-vcard me-1"></i><span class="fw-semibold">Doktor:</span> Dr. @Model.EmployeeName</li>
+                                <li class="mb-2"><i class="bi bi-hospital me-1"></i><span class="fw-semibold">Tıbbi Birim:</span> @Model.ServiceName</li>
+                            </ul>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="mb-2 text-primary"><i class="bi bi-journal-text me-2"></i>Notlar</h5>
+                                <div class="alert alert-info mb-0">@Model.Notes</div>
+                            </div>
+                        </div>
+                    }
+                    <div class="row mt-4">
+                        <div class="col-12 d-flex justify-content-between flex-wrap gap-2">
+                            <a asp-action="Index" class="btn btn-outline-primary btn-lg px-4">
+                                <i class="bi bi-arrow-left me-1"></i> Listeye Dön
+                            </a>
+                            @if (User.IsInRole("Employee"))
+                            {
+                                @if (Model.Status == OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Pending)
+                                {
+                                    <form asp-action="Confirm" asp-route-id="@Model.AppointmentId" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-success btn-lg">
+                                            <i class="bi bi-check-circle"></i> Onayla
+                                        </button>
+                                    </form>
+                                    <form asp-action="Cancel" asp-route-id="@Model.AppointmentId" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-danger btn-lg">
+                                            <i class="bi bi-x-circle"></i> Reddet
+                                        </button>
+                                    </form>
+                                }
+                                @if (Model.Status == OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Confirmed)
+                                {
+                                    <form asp-action="Complete" asp-route-id="@Model.AppointmentId" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-primary btn-lg">
+                                            <i class="bi bi-check2-all"></i> Tamamlandı
+                                        </button>
+                                    </form>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

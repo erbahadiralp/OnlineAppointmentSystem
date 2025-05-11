@@ -1,0 +1,87 @@
+﻿@model IEnumerable<OnlineAppointmentSystem.Entity.DTOs.EmployeeDTO>
+@{
+    ViewData["Title"] = "Çalışanlar";
+}
+<div class="container py-4 dashboard-container">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <h2 class="fw-bold mb-0">@ViewData["Title"]</h2>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Yeni Çalışan
+        </a>
+    </div>
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">Kayıtlı çalışan bulunamadı.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Ad Soyad</th>
+                        <th>Email</th>
+                        <th>Telefon</th>
+                        <th>Bölüm</th>
+                        <th>Ünvan</th>
+                        <th>Durum</th>
+                        <th class="text-end">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var emp in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@emp.FirstName @emp.LastName</td>
+                        <td>@emp.Email</td>
+                        <td>@emp.PhoneNumber</td>
+                        <td>@emp.Department</td>
+                        <td>@emp.Title</td>
+                        <td>
+                            @if (emp.IsActive)
+                            {
+                                <span class="badge badge-success">Aktif</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary">Pasif</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a asp-action="Details" asp-route-id="@emp.EmployeeId" class="btn btn-outline-info" title="Detaylar">
+                                    <i class="bi bi-info-circle"></i>
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@emp.EmployeeId" class="btn btn-outline-primary" title="Düzenle">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@emp.EmployeeId" class="btn btn-outline-danger" title="Sil">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                                @if (emp.IsActive)
+                                {
+                                    <form asp-action="Deactivate" asp-route-id="@emp.EmployeeId" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-outline-warning" title="Pasifleştir">
+                                            <i class="bi bi-toggle-off"></i>
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="Activate" asp-route-id="@emp.EmployeeId" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-outline-success" title="Aktifleştir">
+                                            <i class="bi bi-toggle-on"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
