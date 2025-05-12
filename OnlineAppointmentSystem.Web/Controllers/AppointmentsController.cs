@@ -9,6 +9,9 @@ using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
+using OnlineAppointmentSystem.Entity.Concrete;
+using System.Collections.Generic;
 
 namespace OnlineAppointmentSystem.Web.Controllers
 {
@@ -21,6 +24,7 @@ namespace OnlineAppointmentSystem.Web.Controllers
         private readonly ICustomerService _customerService;
         private readonly IUserService _userService;
         private readonly IWorkingHoursService _workingHoursService;
+        private readonly UserManager<AppUser> _userManager;
 
         public AppointmentsController(
             IAppointmentService appointmentService,
@@ -28,7 +32,8 @@ namespace OnlineAppointmentSystem.Web.Controllers
             IEmployeeService employeeService,
             ICustomerService customerService,
             IUserService userService,
-            IWorkingHoursService workingHoursService)
+            IWorkingHoursService workingHoursService,
+            UserManager<AppUser> userManager)
         {
             _appointmentService = appointmentService;
             _serviceService = serviceService;
@@ -36,6 +41,7 @@ namespace OnlineAppointmentSystem.Web.Controllers
             _customerService = customerService;
             _userService = userService;
             _workingHoursService = workingHoursService;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> Index()
@@ -96,6 +102,13 @@ namespace OnlineAppointmentSystem.Web.Controllers
             {
                 return NotFound();
             }
+
+            // Debug bilgisi
+            Console.WriteLine($"Debug - Details - AppointmentId: {appointment.AppointmentId}");
+            Console.WriteLine($"Debug - Details - CustomerName: {appointment.CustomerName ?? "NULL"}");
+            Console.WriteLine($"Debug - Details - EmployeeName: {appointment.EmployeeName ?? "NULL"}");
+            Console.WriteLine($"Debug - Details - EmployeeTitle: {appointment.EmployeeTitle ?? "NULL"}");
+            Console.WriteLine($"Debug - Details - ServiceName: {appointment.ServiceName ?? "NULL"}");
 
             return View(appointment);
         }
@@ -179,24 +192,13 @@ namespace OnlineAppointmentSystem.Web.Controllers
         {
             try
             {
-                // Hata oluşmadan önce SelectList'leri yeniden yükleyelim
-                var services = await _serviceService.GetActiveServicesAsync() ?? new List<ServiceDTO>();
-                var employees = await _employeeService.GetActiveEmployeesAsync() ?? new List<EmployeeDTO>();
+                model.Services = model.ServiceId > 0
+                    ? new SelectList(await _serviceService.GetActiveServicesAsync(), "ServiceId", "ServiceName", model.ServiceId)
+                    : new SelectList(await _serviceService.GetActiveServicesAsync(), "ServiceId", "ServiceName");
 
-                // Model null kontrolü
-                if (model == null)
-                {
-                    model = new AppointmentCreateViewModel();
-                }
-
-                // SelectList'leri her durumda güncelleyelim
-                model.Services = services != null && services.Any()
-                    ? new SelectList(services.Where(s => s != null && s.ServiceId != 0 && !string.IsNullOrEmpty(s.ServiceName)), "ServiceId", "ServiceName")
-                    : new SelectList(new List<object>());
-
-                model.Employees = employees != null && employees.Any()
+                model.Employees = model.ServiceId > 0
                     ? new SelectList(
-                        employees.Where(e => e != null && e.EmployeeId != 0 && !string.IsNullOrEmpty(e.FirstName) && !string.IsNullOrEmpty(e.LastName))
+                        (await _employeeService.GetEmployeesByServiceIdAsync(model.ServiceId))
                             .Select(e => new { e.EmployeeId, FullName = e.FirstName + " " + e.LastName }),
                         "EmployeeId", "FullName")
                     : new SelectList(new List<object>());
@@ -241,6 +243,30 @@ namespace OnlineAppointmentSystem.Web.Controllers
                 {
                     return RedirectToAction("Login", "Account");
                 }
+                
+                // E-posta doğrulama kontrolü
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return RedirectToAction("Login", "Account");
+                }
+                
+                // Kullanıcı rollerini kontrol et
+                var roles = await _userManager.GetRolesAsync(user);
+                bool isAdminOrEmployee = roles.Contains("Admin") || roles.Contains("Employee");
+                
+                // Admin veya Employee değilse ve e-posta doğrulanmamışsa, randevu oluşturmaya izin verme
+                if (!isAdminOrEmployee && !await _userManager.IsEmailConfirmedAsync(user))
+                {
+                    ModelState.AddModelError(string.Empty, "Randevu oluşturabilmek için önce e-posta adresinizi doğrulamanız gerekmektedir. Lütfen profilinizden e-posta doğrulama işlemini tamamlayın veya yeni bir doğrulama bağlantısı talep edin.");
+                    model.Services = model.Services ?? new SelectList(new List<object>());
+                    model.Employees = model.Employees ?? new SelectList(new List<object>());
+                    
+                    // E-posta doğrulama sayfasına yönlendirme bağlantısı ekle
+                    ViewBag.ShowVerificationLink = true;
+                    
+                    return View(model);
+                }
 
                 var customer = await _customerService.GetCustomerByUserIdAsync(userId);
                 if (customer == null)
@@ -251,31 +277,9 @@ namespace OnlineAppointmentSystem.Web.Controllers
                     return View(model);
                 }
 
-                // Aynı güne ikinci randevu kontrolü
-                var customerAppointments = await _appointmentService.GetAppointmentsByCustomerIdAsync(customer.CustomerId) ?? new List<AppointmentDTO>();
-                if (customerAppointments.Any(a =>
-                    a != null &&
-                    a.Status != OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Cancelled &&
-                    a.AppointmentDate != default(DateTime) &&
-                    model.AppointmentDate != default(DateTime) &&
-                    a.AppointmentDate.Date == model.AppointmentDate.Date))
-                {
-                    ModelState.AddModelError(string.Empty, "Aynı güne birden fazla randevu alamazsınız.");
-                    model.Services = model.Services ?? new SelectList(new List<object>());
-                    model.Employees = model.Employees ?? new SelectList(new List<object>());
-                    return View(model);
-                }
-
+                // Yeni randevu zamanı
                 var appointmentDateTime = model.AppointmentDate.Date.Add(model.AppointmentTime);
-                var appointmentDTO = new AppointmentDTO
-                {
-                    CustomerId = customer.CustomerId,
-                    EmployeeId = model.EmployeeId,
-                    ServiceId = model.ServiceId,
-                    AppointmentDate = appointmentDateTime,
-                    Notes = model.Notes
-                };
-
+                
                 // Servis süresini veritabanından al
                 var service = await _serviceService.GetServiceByIdAsync(model.ServiceId);
                 if (service == null)
@@ -285,6 +289,52 @@ namespace OnlineAppointmentSystem.Web.Controllers
                     model.Employees = model.Employees ?? new SelectList(new List<object>());
                     return View(model);
                 }
+                
+                // Müşterinin aynı saatteki randevu çakışmalarını kontrol et
+                var customerAppointments = await _appointmentService.GetAppointmentsByCustomerIdAsync(customer.CustomerId) ?? new List<AppointmentDTO>();
+                var newAppointmentEnd = appointmentDateTime.AddMinutes(service.Duration);
+                
+                // Aynı saat diliminde başka bir randevu var mı kontrol et
+                bool hasTimeConflict = false;
+                foreach (var existingAppointment in customerAppointments)
+                {
+                    if (existingAppointment == null || 
+                        existingAppointment.Status == OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Cancelled || 
+                        existingAppointment.AppointmentDate == default(DateTime))
+                        continue;
+                    
+                    // Mevcut randevunun hizmet süresini al
+                    var existingService = await _serviceService.GetServiceByIdAsync(existingAppointment.ServiceId);
+                    if (existingService == null) 
+                        continue;
+                    
+                    var existingAppointmentStart = existingAppointment.AppointmentDate;
+                    var existingAppointmentEnd = existingAppointmentStart.AddMinutes(existingService.Duration);
+                    
+                    // Randevu çakışmasını kontrol et
+                    if (appointmentDateTime < existingAppointmentEnd && existingAppointmentStart < newAppointmentEnd)
+                    {
+                        hasTimeConflict = true;
+                        break;
+                    }
+                }
+                
+                if (hasTimeConflict)
+                {
+                    ModelState.AddModelError(string.Empty, "Seçilen saatte başka bir randevunuz bulunmaktadır. Lütfen farklı bir saat seçiniz.");
+                    model.Services = model.Services ?? new SelectList(new List<object>());
+                    model.Employees = model.Employees ?? new SelectList(new List<object>());
+                    return View(model);
+                }
+
+                var appointmentDTO = new AppointmentDTO
+                {
+                    CustomerId = customer.CustomerId,
+                    EmployeeId = model.EmployeeId,
+                    ServiceId = model.ServiceId,
+                    AppointmentDate = appointmentDateTime,
+                    Notes = model.Notes
+                };
 
                 var isAvailable = await _appointmentService.IsTimeSlotAvailableAsync(
                     model.EmployeeId, appointmentDateTime, service.Duration);
@@ -372,14 +422,7 @@ namespace OnlineAppointmentSystem.Web.Controllers
                 if (model.AppointmentTime.Minutes % 15 != 0)
                 {
                     ModelState.AddModelError("AppointmentTime", "Randevu saati sadece 15 dakikalık aralıklarla seçilebilir (örn: 09:00, 09:15, 09:30, 09:45).");
-                    var editServices = await _serviceService.GetActiveServicesAsync();
-                    var editEmployees = await _employeeService.GetActiveEmployeesAsync();
-                    var editStatuses = Enum.GetValues(typeof(AppointmentStatus))
-                        .Cast<AppointmentStatus>()
-                        .Select(s => new { Id = (int)s, Name = s.ToString() });
-                    model.Services = new SelectList(editServices, "ServiceId", "ServiceName");
-                    model.Employees = new SelectList(editEmployees, "EmployeeId", "FullName");
-                    model.Statuses = new SelectList(editStatuses, "Id", "Name");
+                    await PrepareEditViewModelSelects(model);
                     return View(model);
                 }
                 var appointment = await _appointmentService.GetAppointmentByIdAsync(model.AppointmentId);
@@ -393,6 +436,65 @@ namespace OnlineAppointmentSystem.Web.Controllers
                         return Forbid();
                 }
                 var appointmentDateTime = model.AppointmentDate.Date.Add(model.AppointmentTime);
+                
+                // Müşterinin zaman çakışması kontrolü (sadece müşteri ise)
+                if (User.IsInRole("Customer"))
+                {
+                    var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+                    var customer = await _customerService.GetCustomerByUserIdAsync(userId);
+                    if (customer == null || appointment.CustomerId != customer.CustomerId)
+                        return Forbid();
+                        
+                    // Servis süresini al
+                    var service = await _serviceService.GetServiceByIdAsync(model.ServiceId);
+                    if (service == null)
+                    {
+                        ModelState.AddModelError(string.Empty, "Seçilen hizmet bulunamadı.");
+                        PrepareEditViewModelSelects(model);
+                        return View(model);
+                    }
+                    
+                    // Müşterinin diğer randevularını kontrol et
+                    var customerAppointments = await _appointmentService.GetAppointmentsByCustomerIdAsync(customer.CustomerId) ?? new List<AppointmentDTO>();
+                    var newAppointmentEnd = appointmentDateTime.AddMinutes(service.Duration);
+                    
+                    // Aynı saat diliminde başka bir randevu var mı kontrol et (mevcut randevu hariç)
+                    bool hasTimeConflict = false;
+                    foreach (var existingAppointment in customerAppointments)
+                    {
+                        // Kendisiyle karşılaştırmayı atla
+                        if (existingAppointment.AppointmentId == model.AppointmentId)
+                            continue;
+                            
+                        if (existingAppointment == null || 
+                            existingAppointment.Status == OnlineAppointmentSystem.Entity.Enums.AppointmentStatus.Cancelled || 
+                            existingAppointment.AppointmentDate == default(DateTime))
+                            continue;
+                        
+                        // Mevcut randevunun hizmet süresini al
+                        var existingService = await _serviceService.GetServiceByIdAsync(existingAppointment.ServiceId);
+                        if (existingService == null) 
+                            continue;
+                        
+                        var existingAppointmentStart = existingAppointment.AppointmentDate;
+                        var existingAppointmentEnd = existingAppointmentStart.AddMinutes(existingService.Duration);
+                        
+                        // Randevu çakışmasını kontrol et
+                        if (appointmentDateTime < existingAppointmentEnd && existingAppointmentStart < newAppointmentEnd)
+                        {
+                            hasTimeConflict = true;
+                            break;
+                        }
+                    }
+                    
+                    if (hasTimeConflict)
+                    {
+                        ModelState.AddModelError(string.Empty, "Seçilen saatte başka bir randevunuz bulunmaktadır. Lütfen farklı bir saat seçiniz.");
+                        PrepareEditViewModelSelects(model);
+                        return View(model);
+                    }
+                }
+                
                 var appointmentDTO = new AppointmentDTO
                 {
                     AppointmentId = model.AppointmentId,
@@ -598,6 +700,19 @@ namespace OnlineAppointmentSystem.Web.Controllers
             }
 
             return Json(availableTimes);
+        }
+
+        // Yardımcı metod - Edit view model için select listelerini hazırla
+        private async Task PrepareEditViewModelSelects(AppointmentEditViewModel model)
+        {
+            var editServices = await _serviceService.GetActiveServicesAsync();
+            var editEmployees = await _employeeService.GetActiveEmployeesAsync();
+            var editStatuses = Enum.GetValues(typeof(AppointmentStatus))
+                .Cast<AppointmentStatus>()
+                .Select(s => new { Id = (int)s, Name = s.ToString() });
+            model.Services = new SelectList(editServices, "ServiceId", "ServiceName");
+            model.Employees = new SelectList(editEmployees, "EmployeeId", "FullName");
+            model.Statuses = new SelectList(editStatuses, "Id", "Name");
         }
     }
 }

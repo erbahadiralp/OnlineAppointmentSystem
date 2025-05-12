@@ -104,14 +104,33 @@
                                 <i class="bi bi-person-circle me-1"></i>
                                 <span class="fw-semibold">
                                     @{
+                                        // Try to get name from claims first
                                         var firstName = User.Claims.FirstOrDefault(c => c.Type == "FirstName")?.Value;
                                         var lastName = User.Claims.FirstOrDefault(c => c.Type == "LastName")?.Value;
-                                        var fullName = !string.IsNullOrEmpty(firstName) && !string.IsNullOrEmpty(lastName) 
-                                            ? $"{firstName} {lastName}" 
-                                            : User.Identity.Name;
-                                        fullName = fullName.ToUpper(new System.Globalization.CultureInfo("tr-TR"));
+                                        
+                                        // If claims are not available, check if there's a name in identity
+                                        if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
+                                        {
+                                            if (User.Identity.Name.Contains("@"))
+                                            {
+                                                // If it's an email, show only the username part before @
+                                                var userName = User.Identity.Name.Split('@')[0];
+                                                @userName
+                                            }
+                                            else
+                                            {
+                                                // Just show the identity name if no email
+                                                @User.Identity.Name
+                                            }
+                                        }
+                                        else
+                                        {
+                                            // Use the claims values
+                                            var fullName = $"{firstName} {lastName}";
+                                            fullName = fullName.ToUpper(new System.Globalization.CultureInfo("tr-TR"));
+                                            @fullName
+                                        }
                                     }
-                                    @fullName
                                 </span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">

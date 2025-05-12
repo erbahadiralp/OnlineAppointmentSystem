@@ -14,6 +14,7 @@ namespace OnlineAppointmentSystem.Business.Mapping
             CreateMap<Appointment, AppointmentDTO>()
                 .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => $"{src.Customer.User.FirstName} {src.Customer.User.LastName}"))
                 .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => $"{src.Employee.User.FirstName} {src.Employee.User.LastName}"))
+                .ForMember(dest => dest.EmployeeTitle, opt => opt.MapFrom(src => src.Employee.Title))
                 .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.Service.ServiceName))
                 .ForMember(dest => dest.StatusName, opt => opt.MapFrom(src => src.Status.ToString()));
 

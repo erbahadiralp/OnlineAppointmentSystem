@@ -43,22 +43,11 @@
                                     <span>@service.Duration dakika</span>
                                 </div>
                                 <div class="detail-item">
-                                    <i class="bi bi-currency-dollar"></i>
+                                    <i class="bi bi-cash"></i>
                                     <span>₺@service.Price</span>
                                 </div>
                             </div>
-                            @if (User.Identity.IsAuthenticated)
-                            {
-                                <a asp-controller="Appointments" asp-action="Create" class="btn btn-primary w-100 mt-3">
-                                    <i class="bi bi-calendar-plus me-2"></i>Randevu Al
-                                </a>
-                            }
-                            else
-                            {
-                                <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary w-100 mt-3">
-                                    <i class="bi bi-box-arrow-in-right me-2"></i>Giriş Yap
-                                </a>
-                            }
+                           
                         </div>
                     </div>
                 </div>

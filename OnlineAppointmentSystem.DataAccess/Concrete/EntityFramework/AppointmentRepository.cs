@@ -16,6 +16,17 @@ namespace OnlineAppointmentSystem.DataAccess.Concrete.EntityFramework
         {
         }
 
+        public override async Task<Appointment> GetByIdAsync(int id)
+        {
+            return await _dbSet
+                .Include(a => a.Customer)
+                    .ThenInclude(c => c.User)
+                .Include(a => a.Employee)
+                    .ThenInclude(e => e.User)
+                .Include(a => a.Service)
+                .FirstOrDefaultAsync(a => a.AppointmentId == id);
+        }
+
         public async Task<IEnumerable<Appointment>> GetAppointmentsByCustomerIdAsync(int customerId)
         {
             return await _dbSet
@@ -81,18 +92,17 @@ namespace OnlineAppointmentSystem.DataAccess.Concrete.EntityFramework
         public async Task<IEnumerable<Appointment>> GetAppointmentsForReminderAsync()
         {
             var now = DateTime.Now;
-            var reminderTime = now.AddHours(24); // 24 saat içindeki randevular için hatırlatma
-
+            var reminderTime = now.AddHours(24);
             return await _dbSet
                 .Include(a => a.Customer)
                     .ThenInclude(c => c.User)
                 .Include(a => a.Employee)
                     .ThenInclude(e => e.User)
                 .Include(a => a.Service)
-                .Where(a =>
-                    a.AppointmentDate > now &&
-                    a.AppointmentDate <= reminderTime &&
-                    a.Status == AppointmentStatus.Confirmed &&
+                .Where(a => 
+                    a.AppointmentDate > now && 
+                    a.AppointmentDate <= reminderTime && 
+                    a.Status == AppointmentStatus.Confirmed && 
                     !a.ReminderSent)
                 .OrderBy(a => a.AppointmentDate)
                 .ToListAsync();

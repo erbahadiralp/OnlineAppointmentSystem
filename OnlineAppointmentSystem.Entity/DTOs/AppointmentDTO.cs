@@ -15,6 +15,7 @@ namespace OnlineAppointmentSystem.Entity.DTOs
         [Required(ErrorMessage = "Employee is required")]
         public int EmployeeId { get; set; }
         public string EmployeeName { get; set; }
+        public string EmployeeTitle { get; set; }
 
         [Required(ErrorMessage = "Service is required")]
         public int ServiceId { get; set; }

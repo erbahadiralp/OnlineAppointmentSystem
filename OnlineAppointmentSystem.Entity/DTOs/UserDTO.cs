@@ -32,5 +32,7 @@ namespace OnlineAppointmentSystem.Entity.DTOs
         public bool HasEmployeeProfile { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
+        
+        public bool IsEmailConfirmed { get; set; }
     }
 }

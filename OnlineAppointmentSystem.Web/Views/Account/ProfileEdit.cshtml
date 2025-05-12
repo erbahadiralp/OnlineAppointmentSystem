@@ -33,7 +33,7 @@
             
             <div class="mb-3">
                 <label asp-for="PhoneNumber" class="form-label"></label>
-                <input asp-for="PhoneNumber" class="form-control form-control-lg" />
+                <input asp-for="PhoneNumber" id="phoneNumber" class="form-control form-control-lg" />
                 <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
             </div>
             
@@ -53,4 +53,28 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Phone number formatting function
+            $('#phoneNumber').on('blur', function() {
+                let phoneNumber = $(this).val().trim();
+                
+                // Remove all non-digit characters
+                phoneNumber = phoneNumber.replace(/\D/g, '');
+                
+                // If number starts with 0, remove it
+                if (phoneNumber.startsWith('0')) {
+                    phoneNumber = phoneNumber.substring(1);
+                }
+                
+                // If number doesn't start with +90, add it
+                if (!phoneNumber.startsWith('+90') && phoneNumber) {
+                    phoneNumber = '+90' + phoneNumber;
+                }
+                
+                $(this).val(phoneNumber);
+            });
+        });
+    </script>
 } 

@@ -70,11 +70,14 @@ namespace OnlineAppointmentSystem.Business.Concrete
                 if (user == null)
                     return false;
 
+                // Format phone number to include +90 prefix
+                string formattedPhoneNumber = FormatPhoneNumber(userDTO.PhoneNumber);
+
                 user.FirstName = userDTO.FirstName;
                 user.LastName = userDTO.LastName;
                 user.Email = userDTO.Email;
                 user.UserName = userDTO.Email;
-                user.PhoneNumber = userDTO.PhoneNumber;
+                user.PhoneNumber = formattedPhoneNumber;
                 user.Address = userDTO.Address;
 
                 var result = await _userManager.UpdateAsync(user);
@@ -99,6 +102,26 @@ namespace OnlineAppointmentSystem.Business.Concrete
             {
                 return false;
             }
+        }
+
+        // Format phone number to ensure it starts with +90
+        private string FormatPhoneNumber(string phoneNumber)
+        {
+            if (string.IsNullOrWhiteSpace(phoneNumber))
+                return phoneNumber;
+
+            // Remove all non-digit characters
+            phoneNumber = new string(phoneNumber.Where(char.IsDigit).ToArray());
+
+            // If number starts with 0, remove it
+            if (phoneNumber.StartsWith("0"))
+                phoneNumber = phoneNumber.Substring(1);
+
+            // Ensure the number starts with +90
+            if (!phoneNumber.StartsWith("90"))
+                phoneNumber = "90" + phoneNumber;
+
+            return "+" + phoneNumber;
         }
 
         public async Task<bool> DeleteUserAsync(string id)

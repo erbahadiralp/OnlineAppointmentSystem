@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using OnlineAppointmentSystem.Business.Abstract;
+using OnlineAppointmentSystem.Business.BackgroundServices;
 using OnlineAppointmentSystem.DataAccess.Abstract;
 using OnlineAppointmentSystem.Entity.Concrete;
 using OnlineAppointmentSystem.Entity.DTOs;
@@ -8,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace OnlineAppointmentSystem.Business.Concrete
 {
@@ -16,15 +18,18 @@ namespace OnlineAppointmentSystem.Business.Concrete
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
+        private readonly IServiceProvider _serviceProvider;
 
         public NotificationManager(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            IEmailService emailService)
+            IEmailService emailService,
+            IServiceProvider serviceProvider)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _emailService = emailService;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<List<NotificationDTO>> GetAllNotificationsAsync()
@@ -127,22 +132,22 @@ namespace OnlineAppointmentSystem.Business.Concrete
                 if (user == null)
                     return false;
 
-                var emailSent = await _emailService.SendEmailAsync(
+                // EmailQueueService'i kullanarak e-postayı kuyruğa ekle
+                var emailQueueService = _serviceProvider.GetRequiredService<EmailQueueService>();
+                emailQueueService.QueueEmail(
                     user.Email,
                     "Randevu Bilgilendirmesi",
                     notificationDTO.Content);
 
-                if (emailSent)
-                {
-                    var notification = await _unitOfWork.Notifications.GetByIdAsync(notificationDTO.NotificationId);
-                    notification.IsSent = true;
-                    notification.SentDate = DateTime.Now;
+                // Bildirimi gönderilmiş olarak işaretle
+                var notification = await _unitOfWork.Notifications.GetByIdAsync(notificationDTO.NotificationId);
+                notification.IsSent = true;
+                notification.SentDate = DateTime.Now;
 
-                    _unitOfWork.Notifications.Update(notification);
-                    await _unitOfWork.CompleteAsync();
-                }
+                _unitOfWork.Notifications.Update(notification);
+                await _unitOfWork.CompleteAsync();
 
-                return emailSent;
+                return true;
             }
             catch (Exception)
             {

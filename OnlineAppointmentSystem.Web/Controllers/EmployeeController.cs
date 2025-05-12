@@ -35,21 +35,24 @@ namespace OnlineAppointmentSystem.Web.Controllers
             if (employee == null)
                 return RedirectToAction("Login", "Account");
 
-            var appointments = await _appointmentService.GetAppointmentsByEmployeeIdAsync(employee.EmployeeId);
+            var allAppointments = await _appointmentService.GetAppointmentsByEmployeeIdAsync(employee.EmployeeId);
             var now = DateTime.Now;
+
+            // Sadece onaylanmış randevuları filtrele
+            var confirmedAppointments = allAppointments.Where(a => a.Status == Entity.Enums.AppointmentStatus.Confirmed).ToList();
 
             var viewModel = new EmployeeDashboardViewModel
             {
                 EmployeeName = $"{employee.FirstName} {employee.LastName}",
-                TodayAppointments = appointments
+                TodayAppointments = confirmedAppointments
                     .Where(a => a.AppointmentDate.Date == now.Date)
                     .OrderBy(a => a.AppointmentDate)
                     .ToList(),
-                UpcomingAppointments = appointments
-                    .Where(a => a.AppointmentDate.Date > now.Date && a.Status == Entity.Enums.AppointmentStatus.Confirmed)
+                UpcomingAppointments = confirmedAppointments
+                    .Where(a => a.AppointmentDate.Date > now.Date)
                     .OrderBy(a => a.AppointmentDate)
                     .ToList(),
-                PendingAppointments = appointments
+                PendingAppointments = allAppointments
                     .Where(a => a.Status == Entity.Enums.AppointmentStatus.Pending)
                     .OrderBy(a => a.AppointmentDate)
                     .ToList()

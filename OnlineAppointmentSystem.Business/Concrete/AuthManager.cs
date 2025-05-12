@@ -1,11 +1,16 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using OnlineAppointmentSystem.Business.Abstract;
+using OnlineAppointmentSystem.Business.BackgroundServices;
 using OnlineAppointmentSystem.Entity.Concrete;
 using OnlineAppointmentSystem.Entity.DTOs;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.Encodings.Web;
+using System.Security.Claims;
+using System.Collections.Generic;
 
 namespace OnlineAppointmentSystem.Business.Concrete
 {
@@ -17,6 +22,9 @@ namespace OnlineAppointmentSystem.Business.Concrete
         private readonly ICustomerService _customerService;
         private readonly IEmployeeService _employeeService;
         private readonly ILogger<AuthManager> _logger;
+        private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
+        private readonly EmailQueueService _emailQueueService;
 
         public AuthManager(
             UserManager<AppUser> userManager,
@@ -24,7 +32,10 @@ namespace OnlineAppointmentSystem.Business.Concrete
             RoleManager<IdentityRole> roleManager,
             ICustomerService customerService,
             IEmployeeService employeeService,
-            ILogger<AuthManager> logger)
+            ILogger<AuthManager> logger,
+            IConfiguration configuration,
+            IEmailService emailService,
+            EmailQueueService emailQueueService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -32,6 +43,9 @@ namespace OnlineAppointmentSystem.Business.Concrete
             _customerService = customerService;
             _employeeService = employeeService;
             _logger = logger;
+            _configuration = configuration;
+            _emailService = emailService;
+            _emailQueueService = emailQueueService;
         }
 
         //public async Task<UserDTO> LoginAsync(LoginDTO loginDTO)
@@ -274,40 +288,50 @@ namespace OnlineAppointmentSystem.Business.Concrete
                     return null;
                 }
 
+                // Kullanıcının rollerini kontrol et
+                var roles = await _userManager.GetRolesAsync(user);
+                bool isAdminOrEmployee = roles.Contains("Admin") || roles.Contains("Employee");
+
                 // Şifre doğrulama
-                var result = await _signInManager.PasswordSignInAsync(
-                    user,
-                    loginDTO.Password,
-                    loginDTO.RememberMe,
-                    lockoutOnFailure: true);
-
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation($"Kullanıcı başarıyla giriş yaptı: {loginDTO.Email}");
-
-                    // Başarılı giriş sonrası kullanıcı bilgilerini döndür
-                    var roles = await _userManager.GetRolesAsync(user);
-
-                    return new UserDTO
-                    {
-                        Id = user.Id,
-                        FirstName = user.FirstName,
-                        LastName = user.LastName,
-                        Email = user.Email,
-                        PhoneNumber = user.PhoneNumber,
-                        Role = roles.Count > 0 ? roles[0] : null
-                    };
-                }
-                else if (result.IsLockedOut)
-                {
-                    _logger.LogWarning($"Kullanıcı hesabı kilitlendi: {loginDTO.Email}");
-                    return null;
-                }
-                else
+                var passwordCheck = await _userManager.CheckPasswordAsync(user, loginDTO.Password);
+                if (!passwordCheck)
                 {
                     _logger.LogWarning($"Geçersiz şifre: {loginDTO.Email}");
+                    // Başarısız giriş sayısını artır
+                    await _userManager.AccessFailedAsync(user);
                     return null;
                 }
+
+                // Tüm kullanıcı türleri için başarılı şifre doğrulaması sonrası direkt giriş yap
+                // Add claims for name
+                var claims = new List<Claim>
+                {
+                    new Claim("FirstName", user.FirstName),
+                    new Claim("LastName", user.LastName)
+                };
+                
+                // First create the identity principal with claims
+                await _userManager.AddClaimsAsync(user, claims);
+                
+                // Then sign in the user
+                await _signInManager.SignInAsync(user, loginDTO.RememberMe);
+            
+                // E-posta doğrulama durumunu al - Customer için uyarı için kullanacağız
+                bool isEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
+            
+                _logger.LogInformation($"Kullanıcı başarıyla giriş yaptı: {loginDTO.Email}");
+            
+                // Başarılı giriş sonrası kullanıcı bilgilerini döndür
+                return new UserDTO
+                {
+                    Id = user.Id,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    Role = roles.Count > 0 ? roles[0] : null,
+                    IsEmailConfirmed = isEmailConfirmed // E-posta doğrulama durumunu da döndür
+                };
             }
             catch (Exception ex)
             {
@@ -333,13 +357,16 @@ namespace OnlineAppointmentSystem.Business.Concrete
                     return false;
                 }
 
+                // Format phone number to include +90 prefix
+                string formattedPhoneNumber = FormatPhoneNumber(registerDTO.PhoneNumber);
+
                 var user = new AppUser
                 {
                     UserName = registerDTO.Email,
                     Email = registerDTO.Email,
                     FirstName = registerDTO.FirstName,
                     LastName = registerDTO.LastName,
-                    PhoneNumber = registerDTO.PhoneNumber,
+                    PhoneNumber = formattedPhoneNumber,
                     Address = registerDTO.Address
                 };
 
@@ -373,8 +400,28 @@ namespace OnlineAppointmentSystem.Business.Concrete
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Kayıt sırasında hata oluştu: {registerDTO.Email}");
-                throw;
+                return false;
             }
+        }
+
+        // Format phone number to ensure it starts with +90
+        private string FormatPhoneNumber(string phoneNumber)
+        {
+            if (string.IsNullOrWhiteSpace(phoneNumber))
+                return phoneNumber;
+
+            // Remove all non-digit characters
+            phoneNumber = new string(phoneNumber.Where(char.IsDigit).ToArray());
+
+            // If number starts with 0, remove it
+            if (phoneNumber.StartsWith("0"))
+                phoneNumber = phoneNumber.Substring(1);
+
+            // Ensure the number starts with +90
+            if (!phoneNumber.StartsWith("90"))
+                phoneNumber = "90" + phoneNumber;
+
+            return "+" + phoneNumber;
         }
 
         public async Task<bool> IsEmailInUseAsync(string email)
@@ -590,10 +637,49 @@ namespace OnlineAppointmentSystem.Business.Concrete
                 // Şifre sıfırlama token'ı oluştur
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
-                // Burada email gönderme işlemi yapılabilir
-                // ...
+                // Gömülü URL'ye göre şifre yenileme bağlantısı
+                var callbackUrl = $"https://localhost:55675/Account/ResetPassword?userId={user.Id}&token={Uri.EscapeDataString(token)}";
 
-                _logger.LogInformation($"Şifre sıfırlama token'ı oluşturuldu: {email}");
+                // HTML e-posta içeriği
+                var emailBody = $@"
+                <html>
+                <head>
+                    <style>
+                        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px; }}
+                        .header {{ color: #4a86e8; }}
+                        .button {{ display: inline-block; padding: 10px 20px; background-color: #4a86e8; color: white; text-decoration: none; border-radius: 4px; }}
+                        .footer {{ margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #777; }}
+                    </style>
+                </head>
+                <body>
+                    <div class='container'>
+                        <h2 class='header'>Merhaba {user.FirstName} {user.LastName},</h2>
+                        
+                        <p>Şifrenizi sıfırlamak için talepte bulundunuz.</p>
+                        
+                        <p>Şifrenizi sıfırlamak için aşağıdaki bağlantıya tıklayın:</p>
+                        
+                        <p><a href='{callbackUrl}' class='button'>Şifremi Sıfırla</a></p>
+                        
+                        <p>Eğer bu talebi siz yapmadıysanız, lütfen bu e-postayı dikkate almayın.</p>
+                        
+                        <p>Bağlantı 24 saat boyunca geçerli olacaktır.</p>
+                        
+                        <div class='footer'>
+                            <p>Bu e-posta otomatik olarak gönderilmiştir. Lütfen yanıtlamayınız.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>";
+
+                // E-postayı kuyruğa ekle (arka planda gönderilecek)
+                _emailQueueService.QueueEmail(
+                    email,
+                    "Şifre Sıfırlama Talebi",
+                    emailBody);
+
+                _logger.LogInformation($"Şifre sıfırlama e-postası kuyruğa eklendi: {email}");
                 return true;
             }
             catch (Exception ex)

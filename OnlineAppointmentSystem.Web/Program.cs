@@ -44,6 +44,9 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 
     // Kullanıcı adı ve email için normalizasyon ayarları
     options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+    
+    // E-posta doğrulama ayarları - özel mantık AuthManager'da uygulanıyor
+    options.SignIn.RequireConfirmedEmail = false; // AuthManager'da rol bazlı kontrol yapıyoruz
 })
 .AddEntityFrameworkStores<OnlineAppointmentSystemDbContext>()
 .AddDefaultTokenProviders();
@@ -86,6 +89,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 // Background servisleri kaydet
 builder.Services.AddHostedService<AppointmentReminderService>();
+builder.Services.AddSingleton<EmailQueueService>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<EmailQueueService>());
 
 // Authentication ayarlarını güncelliyoruz
 /*builder.Services.AddAuthentication(options =>

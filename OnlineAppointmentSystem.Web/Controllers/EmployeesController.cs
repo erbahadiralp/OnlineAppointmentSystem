@@ -100,7 +100,7 @@ namespace OnlineAppointmentSystem.Web.Controllers
                     Email = model.Email,
                     FirstName = model.FirstName,
                     LastName = model.LastName,
-                    PhoneNumber = model.PhoneNumber,
+                    PhoneNumber = FormatPhoneNumber(model.PhoneNumber),
                     Address = model.Address,
                     CreatedDate = DateTime.Now
                 };
@@ -294,6 +294,26 @@ namespace OnlineAppointmentSystem.Web.Controllers
             {
                 return NotFound();
             }
+        }
+
+        // Format phone number to ensure it starts with +90
+        private string FormatPhoneNumber(string phoneNumber)
+        {
+            if (string.IsNullOrWhiteSpace(phoneNumber))
+                return phoneNumber;
+
+            // Remove all non-digit characters
+            phoneNumber = new string(phoneNumber.Where(char.IsDigit).ToArray());
+
+            // If number starts with 0, remove it
+            if (phoneNumber.StartsWith("0"))
+                phoneNumber = phoneNumber.Substring(1);
+
+            // Ensure the number starts with +90
+            if (!phoneNumber.StartsWith("90"))
+                phoneNumber = "90" + phoneNumber;
+
+            return "+" + phoneNumber;
         }
     }
 }

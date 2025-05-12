@@ -49,7 +49,7 @@
                             <h5 class="mb-3 text-primary"><i class="bi bi-person-badge me-2"></i>Kişi Bilgileri</h5>
                             <ul class="list-unstyled mb-0">
                                 <li class="mb-2"><i class="bi bi-person me-1"></i><span class="fw-semibold">Hasta:</span> @Model.CustomerName</li>
-                                <li class="mb-2"><i class="bi bi-person-vcard me-1"></i><span class="fw-semibold">Doktor:</span> Dr. @Model.EmployeeName</li>
+                                <li class="mb-2"><i class="bi bi-person-vcard me-1"></i><span class="fw-semibold">Doktor:</span> @(string.IsNullOrEmpty(Model.EmployeeTitle) ? "" : Model.EmployeeTitle) @Model.EmployeeName</li>
                                 <li class="mb-2"><i class="bi bi-hospital me-1"></i><span class="fw-semibold">Tıbbi Birim:</span> @Model.ServiceName</li>
                             </ul>
                         </div>

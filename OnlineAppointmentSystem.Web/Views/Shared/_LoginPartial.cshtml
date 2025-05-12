@@ -5,22 +5,49 @@
     {
         <li class="nav-item">
             <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Profile" title="Profil">
-                <i class="bi bi-person-circle"></i> @User.Identity.Name
+                <i class="bi bi-person-circle"></i> 
+                @{
+                    // Try to get name from claims first
+                    var firstName = User.Claims.FirstOrDefault(c => c.Type == "FirstName")?.Value;
+                    var lastName = User.Claims.FirstOrDefault(c => c.Type == "LastName")?.Value;
+                    
+                    // If claims are not available, check if there's a name in identity
+                    if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
+                    {
+                        if (User.Identity.Name.Contains("@"))
+                        {
+                            // If it's an email, show only the username part before @
+                            var userName = User.Identity.Name.Split('@')[0];
+                            @userName
+                        }
+                        else
+                        {
+                            // Just show the identity name if no email
+                            @User.Identity.Name
+                        }
+                    }
+                    else
+                    {
+                        // Use the claims values
+                        var fullName = $"{firstName} {lastName}";
+                        @fullName
+                    }
+                }
             </a>
         </li>
         <li class="nav-item">
             <form class="form-inline" asp-area="" asp-controller="Account" asp-action="Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                <button type="submit" class="nav-link btn btn-link text-dark">Çýkýþ Yap</button>
+                <button type="submit" class="nav-link btn btn-link text-dark">Ã‡Ä±kÄ±ÅŸ Yap</button>
             </form>
         </li>
     }
     else
     {
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Kayýt Ol</a>
+            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">KayÄ±t Ol</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Giriþ Yap</a>
+            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">GiriÅŸ Yap</a>
         </li>
     }
 </ul>

@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.DependencyInjection;
 using OnlineAppointmentSystem.Business.Abstract;
+using OnlineAppointmentSystem.Business.BackgroundServices;
 using OnlineAppointmentSystem.DataAccess.Abstract;
 using OnlineAppointmentSystem.Entity.Concrete;
 using OnlineAppointmentSystem.Entity.DTOs;
@@ -16,12 +18,18 @@ namespace OnlineAppointmentSystem.Business.Concrete
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly INotificationService _notificationService;
+        private readonly IServiceProvider _serviceProvider;
 
-        public AppointmentManager(IUnitOfWork unitOfWork, IMapper mapper, INotificationService notificationService)
+        public AppointmentManager(
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
+            INotificationService notificationService,
+            IServiceProvider serviceProvider)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _notificationService = notificationService;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<List<AppointmentDTO>> GetAllAppointmentsAsync()
@@ -70,33 +78,26 @@ namespace OnlineAppointmentSystem.Business.Concrete
         {
             try
             {
-                // Çalışanın bu saatte müsait olup olmadığını kontrol et
-                var service = await _unitOfWork.Services.GetByIdAsync(appointmentDTO.ServiceId);
-                if (service == null)
-                    return false;
-
-                var isAvailable = await IsTimeSlotAvailableAsync(appointmentDTO.EmployeeId, appointmentDTO.AppointmentDate, service.Duration);
-                if (!isAvailable)
-                    return false;
-
                 var appointment = _mapper.Map<Appointment>(appointmentDTO);
-                appointment.CreatedDate = DateTime.Now;
                 appointment.Status = AppointmentStatus.Pending;
+                appointment.CreatedDate = DateTime.Now;
+                appointment.ReminderSent = false;
 
                 await _unitOfWork.Appointments.AddAsync(appointment);
                 await _unitOfWork.CompleteAsync();
 
-                // Randevu oluşturulduğunda bildirim oluşturmak için gerekli bilgileri çekelim
+                // Randevu bilgilerini eksiksiz alabilmek için tüm ilişkili verileri çekelim
                 var customer = await _unitOfWork.Customers.GetByIdAsync(appointment.CustomerId);
                 var user = await _unitOfWork.Users.GetUserByIdAsync(customer?.UserId ?? string.Empty);
                 var employee = await _unitOfWork.Employees.GetByIdAsync(appointment.EmployeeId);
                 var employeeUser = await _unitOfWork.Users.GetUserByIdAsync(employee?.UserId ?? string.Empty);
+                var service = await _unitOfWork.Services.GetByIdAsync(appointment.ServiceId);
 
                 if (customer == null || user == null || employee == null || employeeUser == null || service == null)
                     return true; // Bildirim oluşturamıyoruz ama randevu oluşturma başarılı olduğu için true dönüyoruz
-
-                // Daha ayrıntılı ve biçimlendirilmiş e-posta içeriği
-                string emailContent = $@"
+                
+                // E-posta içeriği
+                var emailContent = $@"
 <html>
 <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
     <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;'>
@@ -108,7 +109,7 @@ namespace OnlineAppointmentSystem.Business.Concrete
             <p><strong>📅 Tarih:</strong> {appointment.AppointmentDate:dd/MM/yyyy}</p>
             <p><strong>⏰ Saat:</strong> {appointment.AppointmentDate:HH:mm}</p>
             <p><strong>🏥 Branş:</strong> {service.ServiceName}</p>
-            <p><strong>👨‍⚕️ Doktor:</strong> Dr. {employeeUser.FirstName} {employeeUser.LastName}</p>
+            <p><strong>👨‍⚕️ Doktor:</strong> {(string.IsNullOrEmpty(employee.Title) ? "" : employee.Title)} {employeeUser.FirstName} {employeeUser.LastName}</p>
             {(string.IsNullOrEmpty(appointment.Notes) ? "" : $"<p><strong>📝 Not:</strong> {appointment.Notes}</p>")}
         </div>
         
@@ -124,12 +125,21 @@ namespace OnlineAppointmentSystem.Business.Concrete
 </body>
 </html>";
 
+                // E-postayı doğrudan kuyruğa ekle
+                var emailQueueService = _serviceProvider.GetRequiredService<EmailQueueService>();
+                emailQueueService.QueueEmail(
+                    user.Email,
+                    "Randevu Oluşturuldu", 
+                    emailContent);
+                
+                // Bildirim kaydını oluştur (isteğe bağlı)
                 var notificationDTO = new NotificationDTO
                 {
                     AppointmentId = appointment.AppointmentId,
                     NotificationType = "Email",
                     Content = emailContent,
-                    IsSent = false
+                    IsSent = true, // E-posta kuyruğa eklendiği için gönderilmiş olarak işaretle
+                    SentDate = DateTime.Now
                 };
 
                 await _notificationService.CreateNotificationAsync(notificationDTO);
@@ -153,11 +163,11 @@ namespace OnlineAppointmentSystem.Business.Concrete
                 // Tarih değiştiyse, çalışanın müsaitliğini kontrol et
                 if (existingAppointment.AppointmentDate != appointmentDTO.AppointmentDate)
                 {
-                    var service = await _unitOfWork.Services.GetByIdAsync(appointmentDTO.ServiceId);
-                    if (service == null)
+                    var existingService = await _unitOfWork.Services.GetByIdAsync(appointmentDTO.ServiceId);
+                    if (existingService == null)
                         return false;
 
-                    var isAvailable = await IsTimeSlotAvailableAsync(appointmentDTO.EmployeeId, appointmentDTO.AppointmentDate, service.Duration);
+                    var isAvailable = await IsTimeSlotAvailableAsync(appointmentDTO.EmployeeId, appointmentDTO.AppointmentDate, existingService.Duration);
                     if (!isAvailable)
                         return false;
                 }
@@ -168,13 +178,58 @@ namespace OnlineAppointmentSystem.Business.Concrete
                 _unitOfWork.Appointments.Update(existingAppointment);
                 await _unitOfWork.CompleteAsync();
 
-                // Randevu güncellendiğinde bildirim oluştur
+                // Randevu bilgilerini eksiksiz alabilmek için tüm ilişkili verileri çekelim
+                var customer = await _unitOfWork.Customers.GetByIdAsync(existingAppointment.CustomerId);
+                var user = await _unitOfWork.Users.GetUserByIdAsync(customer?.UserId ?? string.Empty);
+                var employee = await _unitOfWork.Employees.GetByIdAsync(existingAppointment.EmployeeId);
+                var employeeUser = await _unitOfWork.Users.GetUserByIdAsync(employee?.UserId ?? string.Empty);
+                var service = await _unitOfWork.Services.GetByIdAsync(existingAppointment.ServiceId);
+
+                if (customer == null || user == null || employee == null || employeeUser == null || service == null)
+                    return true; // Bildirim oluşturamıyoruz ama randevu güncelleme başarılı olduğu için true dönüyoruz
+
+                // E-posta içeriği
+                var emailContent = $@"
+<html>
+<body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
+    <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;'>
+        <h2 style='color: #4a86e8;'>Merhaba {user.FirstName} {user.LastName},</h2>
+        
+        <p>Randevunuz güncellendi. Aşağıda güncel randevu detaylarınızı bulabilirsiniz:</p>
+        
+        <div style='background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;'>
+            <p><strong>📅 Tarih:</strong> {existingAppointment.AppointmentDate:dd/MM/yyyy}</p>
+            <p><strong>⏰ Saat:</strong> {existingAppointment.AppointmentDate:HH:mm}</p>
+            <p><strong>🏥 Branş:</strong> {service.ServiceName}</p>
+            <p><strong>👨‍⚕️ Doktor:</strong> {(string.IsNullOrEmpty(employee.Title) ? "" : employee.Title)} {employeeUser.FirstName} {employeeUser.LastName}</p>
+            {(string.IsNullOrEmpty(existingAppointment.Notes) ? "" : $"<p><strong>📝 Not:</strong> {existingAppointment.Notes}</p>")}
+        </div>
+        
+        <p>Sorularınız için bizimle iletişime geçebilirsiniz.</p>
+        <p>Sağlıklı günler dileriz.</p>
+        
+        <div style='margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #777;'>
+            <p>Bu e-posta otomatik olarak gönderilmiştir. Lütfen yanıtlamayınız.</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+                // E-postayı doğrudan kuyruğa ekle
+                var emailQueueService = _serviceProvider.GetRequiredService<EmailQueueService>();
+                emailQueueService.QueueEmail(
+                    user.Email,
+                    "Randevu Güncellendi", 
+                    emailContent);
+
+                // Bildirim kaydını oluştur (isteğe bağlı)
                 var notificationDTO = new NotificationDTO
                 {
                     AppointmentId = existingAppointment.AppointmentId,
                     NotificationType = "Email",
-                    Content = $"Randevunuz güncellendi: {existingAppointment.AppointmentDate}",
-                    IsSent = false
+                    Content = emailContent,
+                    IsSent = true, // E-posta kuyruğa eklendiği için gönderilmiş olarak işaretle
+                    SentDate = DateTime.Now
                 };
 
                 await _notificationService.CreateNotificationAsync(notificationDTO);
@@ -251,7 +306,7 @@ namespace OnlineAppointmentSystem.Business.Concrete
             <p><strong>📅 Tarih:</strong> {appointment.AppointmentDate:dd/MM/yyyy}</p>
             <p><strong>⏰ Saat:</strong> {appointment.AppointmentDate:HH:mm}</p>
             <p><strong>🏥 Branş:</strong> {service.ServiceName}</p>
-            <p><strong>👨‍⚕️ Doktor:</strong> Dr. {employeeUser.FirstName} {employeeUser.LastName}</p>
+            <p><strong>👨‍⚕️ Doktor:</strong> {(string.IsNullOrEmpty(employee.Title) ? "" : employee.Title)} {employeeUser.FirstName} {employeeUser.LastName}</p>
             {(string.IsNullOrEmpty(appointment.Notes) ? "" : $"<p><strong>📝 Not:</strong> {appointment.Notes}</p>")}
         </div>
         
@@ -265,12 +320,21 @@ namespace OnlineAppointmentSystem.Business.Concrete
 </body>
 </html>";
 
+                // E-postayı doğrudan kuyruğa ekle
+                var emailQueueService = _serviceProvider.GetRequiredService<EmailQueueService>();
+                emailQueueService.QueueEmail(
+                    user.Email,
+                    $"Randevu Durumu: {statusText.ToUpper()}", 
+                    emailContent);
+
+                // Bildirim kaydını oluştur (isteğe bağlı)
                 var notificationDTO = new NotificationDTO
                 {
                     AppointmentId = appointment.AppointmentId,
                     NotificationType = "Email",
                     Content = emailContent,
-                    IsSent = false
+                    IsSent = true, // E-posta kuyruğa eklendiği için gönderilmiş olarak işaretle
+                    SentDate = DateTime.Now
                 };
 
                 await _notificationService.CreateNotificationAsync(notificationDTO);
@@ -337,13 +401,55 @@ namespace OnlineAppointmentSystem.Business.Concrete
 
                 foreach (var appointment in appointmentsForReminder)
                 {
-                    // Hatırlatma bildirimi oluştur
+                    // Randevu bilgilerini eksiksiz alabilmek için tüm ilişkili verileri çekelim
+                    var customer = appointment.Customer;
+                    var user = customer?.User;
+                    var service = appointment.Service;
+                    
+                    if (customer == null || user == null || service == null)
+                        continue; // Gerekli bilgiler yoksa bu randevu için hatırlatma göndermiyoruz
+                    
+                    // E-posta içeriği
+                    var emailContent = $@"
+<html>
+<body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
+    <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;'>
+        <h2 style='color: #4a86e8;'>Merhaba {user.FirstName} {user.LastName},</h2>
+        
+        <p><strong>Randevu Hatırlatması</strong></p>
+        
+        <div style='background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;'>
+            <p><strong>📅 Tarih:</strong> {appointment.AppointmentDate:dd/MM/yyyy}</p>
+            <p><strong>⏰ Saat:</strong> {appointment.AppointmentDate:HH:mm}</p>
+            <p><strong>🏥 Branş:</strong> {service.ServiceName}</p>
+        </div>
+        
+        <p>Randevunuzu kaçırmamanız için bu hatırlatmayı gönderiyoruz.</p>
+        <p>Sorularınız için bizimle iletişime geçebilirsiniz.</p>
+        <p>Sağlıklı günler dileriz.</p>
+        
+        <div style='margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #777;'>
+            <p>Bu e-posta otomatik olarak gönderilmiştir. Lütfen yanıtlamayınız.</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+                    // E-postayı doğrudan kuyruğa ekle
+                    var emailQueueService = _serviceProvider.GetRequiredService<EmailQueueService>();
+                    emailQueueService.QueueEmail(
+                        user.Email,
+                        "Randevu Hatırlatması", 
+                        emailContent);
+
+                    // Hatırlatma bildirimi oluştur (isteğe bağlı)
                     var notificationDTO = new NotificationDTO
                     {
                         AppointmentId = appointment.AppointmentId,
                         NotificationType = "Email",
-                        Content = $"Randevu hatırlatması: {appointment.AppointmentDate} tarihinde {appointment.Service.ServiceName} hizmetiniz bulunmaktadır.",
-                        IsSent = false
+                        Content = emailContent,
+                        IsSent = true, // E-posta kuyruğa eklendiği için gönderilmiş olarak işaretle 
+                        SentDate = DateTime.Now
                     };
 
                     await _notificationService.CreateNotificationAsync(notificationDTO);

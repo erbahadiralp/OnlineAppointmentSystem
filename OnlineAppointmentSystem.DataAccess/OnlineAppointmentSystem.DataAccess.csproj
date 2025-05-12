@@ -31,7 +31,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OnlineAppointmentSystem.Entity\OnlineAppointmentSystem.Entity.csproj" />
-    <ProjectReference Include="..\OnlineAppointmentSystem\OnlineAppointmentSystem.csproj" />
+    
   </ItemGroup>
 
 </Project>

@@ -11,6 +11,14 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
+    
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-4 rounded-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
     <div class="row mb-4">
         <div class="col text-center">
@@ -32,10 +40,47 @@
                         <span class="badge bg-primary mb-2">@Model.Role</span>
                     </div>
                     <ul class="list-group list-group-flush mb-3">
-                        <li class="list-group-item"><i class="bi bi-envelope me-2"></i><span class="fw-semibold">E-posta:</span> @Model.Email</li>
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-envelope me-2"></i><span class="fw-semibold">E-posta:</span> @Model.Email
+                                </div>
+                                @if (ViewBag.IsEmailConfirmed)
+                                {
+                                    <span class="badge bg-success d-flex align-items-center">
+                                        <i class="bi bi-check-circle me-1"></i> Doğrulanmış
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning d-flex align-items-center">
+                                        <i class="bi bi-exclamation-triangle me-1"></i> Doğrulanmamış
+                                    </span>
+                                }
+                            </div>
+                        </li>
                         <li class="list-group-item"><i class="bi bi-telephone me-2"></i><span class="fw-semibold">Telefon:</span> @Model.PhoneNumber</li>
                         <li class="list-group-item"><i class="bi bi-geo-alt me-2"></i><span class="fw-semibold">Adres:</span> @Model.Address</li>
                     </ul>
+                    
+                    @if (!ViewBag.IsEmailConfirmed)
+                    {
+                        <div class="alert alert-warning mb-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-exclamation-circle fs-4 me-2"></i>
+                                <div>
+                                    <strong>E-posta adresiniz doğrulanmamış!</strong>
+                                    <p class="mb-0">Randevu oluşturmak için lütfen e-posta adresinizi doğrulayın.</p>
+                                </div>
+                            </div>
+                            <form asp-action="ResendEmailConfirmation" method="post" class="mt-2">
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="bi bi-envelope-check me-1"></i> Doğrulama E-postası Gönder
+                                </button>
+                            </form>
+                        </div>
+                    }
+                    
                     <div class="d-flex justify-content-between flex-wrap gap-2 mt-4">
                         <a asp-action="ProfileEdit" class="btn btn-primary">
                             <i class="bi bi-pencil-square me-1"></i> Profili Düzenle
