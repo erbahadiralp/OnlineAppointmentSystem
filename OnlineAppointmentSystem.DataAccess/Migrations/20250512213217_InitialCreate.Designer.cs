@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OnlineAppointmentSystem.DataAccess.Concrete.EntityFramework;
 
@@ -11,9 +12,11 @@ using OnlineAppointmentSystem.DataAccess.Concrete.EntityFramework;
 namespace OnlineAppointmentSystem.DataAccess.Migrations
 {
     [DbContext(typeof(OnlineAppointmentSystemDbContext))]
-    partial class OnlineAppointmentSystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250512213217_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -304,9 +307,6 @@ namespace OnlineAppointmentSystem.DataAccess.Migrations
                     b.Property<string>("Gender")
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");

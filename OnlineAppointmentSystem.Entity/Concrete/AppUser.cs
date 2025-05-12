@@ -18,6 +18,8 @@ namespace OnlineAppointmentSystem.Entity.Concrete
 
         public DateTime CreatedDate { get; set; }
 
+        public bool IsActive { get; set; } = true;
+
         public virtual Employee Employee { get; set; }
         public virtual Customer Customer { get; set; }
     }

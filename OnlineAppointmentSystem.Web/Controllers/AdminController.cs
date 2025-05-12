@@ -12,15 +12,18 @@ namespace OnlineAppointmentSystem.Web.Controllers
         private readonly IAppointmentService _appointmentService;
         private readonly IEmployeeService _employeeService;
         private readonly IServiceService _serviceService;
+        private readonly ICustomerService _customerService;
 
         public AdminController(
             IAppointmentService appointmentService,
             IEmployeeService employeeService,
-            IServiceService serviceService)
+            IServiceService serviceService,
+            ICustomerService customerService)
         {
             _appointmentService = appointmentService;
             _employeeService = employeeService;
             _serviceService = serviceService;
+            _customerService = customerService;
         }
 
         public async Task<IActionResult> Dashboard()
@@ -28,12 +31,14 @@ namespace OnlineAppointmentSystem.Web.Controllers
             var appointments = await _appointmentService.GetAllAppointmentsAsync();
             var doctors = await _employeeService.GetAllEmployeesAsync();
             var departments = await _serviceService.GetAllServicesAsync();
+            var customers = await _customerService.GetAllCustomersAsync();
 
             var viewModel = new AdminDashboardViewModel
             {
                 TotalAppointments = appointments.Count,
                 TotalDoctors = doctors.Count,
                 TotalDepartments = departments.Count,
+                TotalCustomers = customers.Count,
                 Appointments = appointments,
                 Doctors = doctors,
                 Departments = departments

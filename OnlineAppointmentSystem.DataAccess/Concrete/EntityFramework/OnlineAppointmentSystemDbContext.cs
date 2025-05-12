@@ -86,6 +86,10 @@ namespace OnlineAppointmentSystem.DataAccess.Concrete.EntityFramework
             modelBuilder.Entity<Appointment>()
                 .Property(a => a.Status)
                 .HasConversion<int>();
+
+            modelBuilder.Entity<Service>()
+                .Property(s => s.Price)
+                .HasPrecision(18, 2);
         }
     }
 }

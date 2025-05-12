@@ -12,5 +12,7 @@ namespace OnlineAppointmentSystem.Business.Abstract
         Task<bool> CreateCustomerAsync(CustomerDTO customerDTO);
         Task<bool> UpdateCustomerAsync(CustomerDTO customerDTO);
         Task<bool> DeleteCustomerAsync(int id);
+        Task<bool> ActivateCustomerAsync(int id);
+        Task<bool> DeactivateCustomerAsync(int id);
     }
 }

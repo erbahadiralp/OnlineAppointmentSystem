@@ -25,5 +25,10 @@ namespace OnlineAppointmentSystem.DataAccess.Concrete.EntityFramework
                 .Include(c => c.User)
                 .FirstOrDefaultAsync(c => c.UserId == userId);
         }
+
+        public async Task<List<Customer>> GetAllWithUserAsync()
+        {
+            return await _dbSet.Include(c => c.User).ToListAsync();
+        }
     }
 }

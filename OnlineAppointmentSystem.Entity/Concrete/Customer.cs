@@ -23,6 +23,8 @@ namespace OnlineAppointmentSystem.Entity.Concrete
 
         public DateTime? UpdatedDate { get; set; }
 
+        public bool IsActive { get; set; } = true;
+
         // Navigation properties
         [ForeignKey("UserId")]
         public virtual AppUser User { get; set; }

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Text.Encodings.Web;
 using System.Security.Claims;
 using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace OnlineAppointmentSystem.Business.Concrete
 {
@@ -24,7 +25,7 @@ namespace OnlineAppointmentSystem.Business.Concrete
         private readonly ILogger<AuthManager> _logger;
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
-        private readonly EmailQueueService _emailQueueService;
+        private readonly IServiceProvider _serviceProvider;
 
         public AuthManager(
             UserManager<AppUser> userManager,
@@ -35,7 +36,7 @@ namespace OnlineAppointmentSystem.Business.Concrete
             ILogger<AuthManager> logger,
             IConfiguration configuration,
             IEmailService emailService,
-            EmailQueueService emailQueueService)
+            IServiceProvider serviceProvider)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -45,7 +46,7 @@ namespace OnlineAppointmentSystem.Business.Concrete
             _logger = logger;
             _configuration = configuration;
             _emailService = emailService;
-            _emailQueueService = emailQueueService;
+            _serviceProvider = serviceProvider;
         }
 
         //public async Task<UserDTO> LoginAsync(LoginDTO loginDTO)
@@ -674,7 +675,8 @@ namespace OnlineAppointmentSystem.Business.Concrete
                 </html>";
 
                 // E-postayı kuyruğa ekle (arka planda gönderilecek)
-                _emailQueueService.QueueEmail(
+                var emailQueueService = _serviceProvider.GetRequiredService<EmailQueueService>();
+                emailQueueService.QueueEmail(
                     email,
                     "Şifre Sıfırlama Talebi",
                     emailBody);

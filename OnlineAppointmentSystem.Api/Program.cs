@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Identity;
 using OnlineAppointmentSystem.Business.Abstract;
+using OnlineAppointmentSystem.Business.BackgroundServices;
 using OnlineAppointmentSystem.Business.Concrete;
 using OnlineAppointmentSystem.Business.Mapping;
 using OnlineAppointmentSystem.DataAccess.Cache;
@@ -108,8 +109,9 @@ builder.Services.AddScoped<IAuthService, AuthManager>();
 builder.Services.AddScoped<ICustomerService, CustomerManager>();
 builder.Services.AddScoped<IEmailService, EmailManager>();
 builder.Services.AddScoped<IEmployeeService, EmployeeManager>();
-
 builder.Services.AddScoped<IServiceService, ServiceManager>();
+builder.Services.AddScoped<EmailQueueService>();
+builder.Services.AddHostedService<EmailQueueService>();
 // Diğer servisler
 //
 // builder.Services.AddScoped<IDoctorService, DoctorManager>();

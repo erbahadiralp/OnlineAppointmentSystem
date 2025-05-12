@@ -12,8 +12,8 @@ using OnlineAppointmentSystem.DataAccess.Concrete.EntityFramework;
 namespace OnlineAppointmentSystem.DataAccess.Migrations
 {
     [DbContext(typeof(OnlineAppointmentSystemDbContext))]
-    [Migration("20250507142229_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250512220643_AddIsActiveToCustomer")]
+    partial class AddIsActiveToCustomer
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -190,6 +190,9 @@ namespace OnlineAppointmentSystem.DataAccess.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -262,7 +265,6 @@ namespace OnlineAppointmentSystem.DataAccess.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Notes")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("ReminderSent")
@@ -303,9 +305,11 @@ namespace OnlineAppointmentSystem.DataAccess.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Gender")
-                        .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
@@ -435,6 +439,7 @@ namespace OnlineAppointmentSystem.DataAccess.Migrations
                         .HasColumnType("bit");
 
                     b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("ServiceName")

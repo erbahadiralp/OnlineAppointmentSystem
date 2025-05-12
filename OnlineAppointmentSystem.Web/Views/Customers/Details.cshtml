@@ -1,0 +1,38 @@
+@model OnlineAppointmentSystem.Entity.DTOs.CustomerDTO
+
+@{
+    ViewData["Title"] = "Müşteri Detayları";
+}
+<div class="container py-4 d-flex justify-content-center align-items-center min-vh-80">
+    <div class="appointment-create-card p-4 shadow rounded-3" style="max-width: 520px; width:100%">
+        <div class="d-flex align-items-center mb-3">
+            <div class="doctor-avatar me-3">
+                <i class="bi bi-person-circle"></i>
+            </div>
+            <div>
+                <h3 class="fw-bold mb-0">@Model.FirstName @Model.LastName</h3>
+                <div class="text-muted small">@Model.Email</div>
+            </div>
+        </div>
+        <dl class="row mb-3">
+            <dt class="col-sm-4">Telefon</dt>
+            <dd class="col-sm-8"><i class="bi bi-telephone me-1"></i>@Model.PhoneNumber</dd>
+            <dt class="col-sm-4">Adres</dt>
+            <dd class="col-sm-8"><i class="bi bi-geo-alt me-1"></i>@Model.Address</dd>
+            <dt class="col-sm-4">Durum</dt>
+            <dd class="col-sm-8">
+                <span class="badge @(Model.IsActive ? "badge-success" : "badge-secondary")">@((Model.IsActive) ? "Aktif" : "Pasif")</span>
+            </dd>
+            <dt class="col-sm-4">Kayıt Tarihi</dt>
+            <dd class="col-sm-8"><i class="bi bi-calendar me-1"></i>@Model.CreatedDate.ToString("dd.MM.yyyy HH:mm")</dd>
+        </dl>
+        <div class="d-flex justify-content-end mt-3">
+            <a asp-action="Index" class="btn btn-outline-secondary btn-lg px-4">
+                <i class="bi bi-arrow-left me-1"></i> Geri Dön
+            </a>
+            <a asp-action="Delete" asp-route-id="@Model.CustomerId" class="btn btn-outline-danger btn-lg px-4">
+                <i class="bi bi-trash"></i> Sil
+            </a>
+        </div>
+    </div>
+</div> 

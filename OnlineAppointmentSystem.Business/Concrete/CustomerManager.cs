@@ -23,7 +23,7 @@ namespace OnlineAppointmentSystem.Business.Concrete
 
         public async Task<List<CustomerDTO>> GetAllCustomersAsync()
         {
-            var customers = await _unitOfWork.Customers.GetAllAsync();
+            var customers = await _unitOfWork.Customers.GetAllWithUserAsync();
             return _mapper.Map<List<CustomerDTO>>(customers);
         }
 
@@ -93,6 +93,58 @@ namespace OnlineAppointmentSystem.Business.Concrete
                     return false;
 
                 _unitOfWork.Customers.Remove(customer);
+                await _unitOfWork.CompleteAsync();
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> ActivateCustomerAsync(int id)
+        {
+            try
+            {
+                var customer = await _unitOfWork.Customers.GetByIdAsync(id);
+                if (customer == null)
+                    return false;
+
+                var user = await _unitOfWork.Users.GetByIdAsync(customer.UserId);
+                if (user == null)
+                    return false;
+
+                user.IsActive = true;
+                customer.IsActive = true;
+                _unitOfWork.Users.Update(user);
+                _unitOfWork.Customers.Update(customer);
+                await _unitOfWork.CompleteAsync();
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> DeactivateCustomerAsync(int id)
+        {
+            try
+            {
+                var customer = await _unitOfWork.Customers.GetByIdAsync(id);
+                if (customer == null)
+                    return false;
+
+                var user = await _unitOfWork.Users.GetByIdAsync(customer.UserId);
+                if (user == null)
+                    return false;
+
+                user.IsActive = false;
+                customer.IsActive = false;
+                _unitOfWork.Users.Update(user);
+                _unitOfWork.Customers.Update(customer);
                 await _unitOfWork.CompleteAsync();
 
                 return true;

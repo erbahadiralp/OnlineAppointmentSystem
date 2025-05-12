@@ -80,6 +80,7 @@ namespace OnlineAppointmentSystem.Web.Controllers
                 ModelState.Remove("Department");
                 ModelState.Remove("ServiceId");
             }
+            ModelState.Remove("UserId");
             if (!ModelState.IsValid)
             {
                 Console.WriteLine("[LOG] ModelState is invalid. Errors:");

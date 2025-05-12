@@ -8,6 +8,7 @@ namespace OnlineAppointmentSystem.Web.Models
         public int TotalAppointments { get; set; }
         public int TotalDoctors { get; set; }
         public int TotalDepartments { get; set; }
+        public int TotalCustomers { get; set; }
         public List<AppointmentDTO> Appointments { get; set; }
         public List<EmployeeDTO> Doctors { get; set; }
         public List<ServiceDTO> Departments { get; set; }

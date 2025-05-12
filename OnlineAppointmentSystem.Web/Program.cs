@@ -3,11 +3,14 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using OnlineAppointmentSystem.Business.Abstract;
 using OnlineAppointmentSystem.Business.BackgroundServices;
+using OnlineAppointmentSystem.Business.Concrete;
 using OnlineAppointmentSystem.Business.Extensions;
 using OnlineAppointmentSystem.DataAccess.Concrete.EntityFramework;
 using OnlineAppointmentSystem.DataAccess.Extensions;
 using OnlineAppointmentSystem.Entity.Concrete;
+using OnlineAppointmentSystem.Web.Models;
 using System;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -89,8 +92,9 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 // Background servisleri kaydet
 builder.Services.AddHostedService<AppointmentReminderService>();
+
 builder.Services.AddSingleton<EmailQueueService>();
-builder.Services.AddHostedService(sp => sp.GetRequiredService<EmailQueueService>());
+builder.Services.AddHostedService(provider => provider.GetRequiredService<EmailQueueService>());
 
 // Authentication ayarlarını güncelliyoruz
 /*builder.Services.AddAuthentication(options =>
@@ -130,6 +134,14 @@ builder.Services.AddHostedService(sp => sp.GetRequiredService<EmailQueueService>
         }
     };
 });*/
+
+// Business Services
+builder.Services.AddScoped<IAppointmentService, AppointmentManager>();
+builder.Services.AddScoped<IAuthService, AuthManager>();
+builder.Services.AddScoped<ICustomerService, CustomerManager>();
+builder.Services.AddScoped<IEmailService, EmailManager>();
+builder.Services.AddScoped<IEmployeeService, EmployeeManager>();
+builder.Services.AddScoped<IServiceService, ServiceManager>();
 
 // Diğer servis kayıtları...
 
