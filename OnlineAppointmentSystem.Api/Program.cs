@@ -134,11 +134,17 @@ builder.Services.AddScoped<INotificationService, NotificationManager>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// if kısmını kaldırıyoruz ve direkt Swagger'ı yapılandırıyoruz
+
+// Swagger bölümünü yeniden yapılandıralım
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Online Appointment System API v1");
+    c.RoutePrefix = "swagger";
+    c.DocumentTitle = "Online Appointment System API";
+    c.DefaultModelsExpandDepth(-1); // Models bölümünü gizle
+});
 
 app.UseHttpsRedirection();
 
@@ -152,7 +158,7 @@ app.Use(async (context, next) =>
     context.Response.Headers.Add("X-Frame-Options", "DENY");
     context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
     context.Response.Headers.Add("Referrer-Policy", "strict-origin-when-cross-origin");
-    context.Response.Headers.Add("Content-Security-Policy", "default-src 'self'");
+    context.Response.Headers.Add("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;");
     await next();
 });
 
