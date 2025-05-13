@@ -96,45 +96,6 @@ builder.Services.AddHostedService<AppointmentReminderService>();
 builder.Services.AddSingleton<EmailQueueService>();
 builder.Services.AddHostedService(provider => provider.GetRequiredService<EmailQueueService>());
 
-// Authentication ayarlarını güncelliyoruz
-/*builder.Services.AddAuthentication(options =>
-{
-    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-})
-.AddCookie(options =>
-{
-    options.ExpireTimeSpan = TimeSpan.FromDays(30);
-    options.SlidingExpiration = true;
-    options.LoginPath = "/Account/Login";
-    options.LogoutPath = "/Account/Logout";
-    options.AccessDeniedPath = "/Account/AccessDenied";
-    options.Cookie.Name = "OnlineAppointmentAuth"; // Özel cookie adı
-    options.Cookie.HttpOnly = true;
-    // Geliştirme ortamında Secure ve SameSite ayarlarını değiştirin
-    if (builder.Environment.IsDevelopment())
-    {
-        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-        options.Cookie.SameSite = SameSiteMode.Lax;
-    }
-    else
-    {
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-        options.Cookie.SameSite = SameSiteMode.Strict;
-    }
-    
-    // Cookie yenileme olayı
-    options.Events = new CookieAuthenticationEvents
-    {
-        OnValidatePrincipal = async context =>
-        {
-            // Burada gerekirse ek doğrulama yapabilirsiniz
-        }
-    };
-});*/
-
 // Business Services
 builder.Services.AddScoped<IAppointmentService, AppointmentManager>();
 builder.Services.AddScoped<IAuthService, AuthManager>();

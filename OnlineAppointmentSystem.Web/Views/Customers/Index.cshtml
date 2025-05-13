@@ -51,16 +51,16 @@
                                 @if (customer.IsActive)
                                 {
                                     <form asp-action="Deactivate" asp-route-id="@customer.CustomerId" method="post" class="d-inline">
-                                        <button type="submit" class="btn btn-outline-warning" title="Pasifleştir" onclick="return confirm('Müşteriyi deaktif etmek istediğinize emin misiniz?')">
-                                            <i class="bi bi-toggle-off"></i>
+                                        <button type="submit" class="btn btn-outline-success" title="Pasifleştir" onclick="return confirm('Müşteriyi deaktif etmek istediğinize emin misiniz?')">
+                                            <i class="bi bi-toggle-on"></i>
                                         </button>
                                     </form>
                                 }
                                 else
                                 {
                                     <form asp-action="Activate" asp-route-id="@customer.CustomerId" method="post" class="d-inline">
-                                        <button type="submit" class="btn btn-outline-success" title="Aktifleştir" onclick="return confirm('Müşteriyi aktif etmek istediğinize emin misiniz?')">
-                                            <i class="bi bi-toggle-on"></i>
+                                        <button type="submit" class="btn btn-outline-warning" title="Aktifleştir" onclick="return confirm('Müşteriyi aktif etmek istediğinize emin misiniz?')">
+                                            <i class="bi bi-toggle-off"></i>
                                         </button>
                                     </form>
                                 }

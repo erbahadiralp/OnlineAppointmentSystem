@@ -1,0 +1,95 @@
+version: '3.9'
+
+services:
+  # SQL Server
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Appt@Sys0nlin3DB!2024
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - appointment-network
+    restart: always
+
+  # DB Initialization (one-time)
+  db-init:
+    build:
+      context: .
+      dockerfile: Dockerfile.init
+    container_name: db-init
+    depends_on:
+      - sqlserver
+    volumes:
+      - ./init-scripts:/init-scripts
+    networks:
+      - appointment-network
+
+  # Redis Cache
+  redis:
+    image: redis:alpine
+    container_name: appointment-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - appointment-network
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # API Service
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: appointment-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=OnlineAppointmentSystemDB;User Id=sa;Password=Appt@Sys0nlin3DB!2024;TrustServerCertificate=True;MultipleActiveResultSets=true
+      - ConnectionStrings__RedisConnection=appointment-redis:6379
+      - UseRedisCache=true
+    depends_on:
+      - db-init
+      - redis
+    ports:
+      - "5000:8080"
+    networks:
+      - appointment-network
+    restart: on-failure
+
+  # Web Application
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: appointment-web
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=OnlineAppointmentSystemDB;User Id=sa;Password=Appt@Sys0nlin3DB!2024;TrustServerCertificate=True;MultipleActiveResultSets=true
+      - ConnectionStrings__RedisConnection=appointment-redis:6379
+      - UseRedisCache=true
+    depends_on:
+      - api
+    ports:
+      - "5001:8080"
+    networks:
+      - appointment-network
+    restart: on-failure
+
+networks:
+  appointment-network:
+    driver: bridge
+
+volumes:
+  sqlserver_data:
+  redis_data: 

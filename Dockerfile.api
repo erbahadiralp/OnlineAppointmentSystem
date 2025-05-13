@@ -1,0 +1,32 @@
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Tüm projeleri kopyala
+COPY ["OnlineAppointmentSystem.Api/OnlineAppointmentSystem.Api.csproj", "OnlineAppointmentSystem.Api/"]
+COPY ["OnlineAppointmentSystem.Business/OnlineAppointmentSystem.Business.csproj", "OnlineAppointmentSystem.Business/"]
+COPY ["OnlineAppointmentSystem.DataAccess/OnlineAppointmentSystem.DataAccess.csproj", "OnlineAppointmentSystem.DataAccess/"]
+COPY ["OnlineAppointmentSystem.Entity/OnlineAppointmentSystem.Entity.csproj", "OnlineAppointmentSystem.Entity/"]
+
+# Bağımlılıkları yükle
+RUN dotnet restore "OnlineAppointmentSystem.Api/OnlineAppointmentSystem.Api.csproj"
+
+# Tüm kaynak kodu kopyala
+COPY OnlineAppointmentSystem.Api/. ./OnlineAppointmentSystem.Api/
+COPY OnlineAppointmentSystem.Business/. ./OnlineAppointmentSystem.Business/
+COPY OnlineAppointmentSystem.DataAccess/. ./OnlineAppointmentSystem.DataAccess/
+COPY OnlineAppointmentSystem.Entity/. ./OnlineAppointmentSystem.Entity/
+
+# API projesini derle
+WORKDIR "/src/OnlineAppointmentSystem.Api"
+RUN dotnet publish "OnlineAppointmentSystem.Api.csproj" -c Release -o /app/publish
+
+# Final image
+FROM base AS final
+WORKDIR /app
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "OnlineAppointmentSystem.Api.dll"] 

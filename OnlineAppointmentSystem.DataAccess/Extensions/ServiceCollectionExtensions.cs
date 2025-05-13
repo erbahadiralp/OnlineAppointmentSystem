@@ -15,7 +15,15 @@ namespace OnlineAppointmentSystem.DataAccess.Extensions
             // DbContext - Program.cs'de zaten yapılandırıldığı için kaldırabilirsiniz
             // veya burada bırakıp Program.cs'den kaldırabilirsiniz
             services.AddDbContext<OnlineAppointmentSystemDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
+                    sqlServerOptionsAction: sqlOptions =>
+                    {
+                        sqlOptions.EnableRetryOnFailure(
+                            maxRetryCount: 5,
+                            maxRetryDelay: TimeSpan.FromSeconds(30),
+                            errorNumbersToAdd: null);
+                        sqlOptions.CommandTimeout(60);
+                    }));
 
             // Identity yapılandırmasını kaldırıyoruz - Bu Program.cs'de yapılmalı
             // services.AddIdentity<AppUser, IdentityRole>... - BU KISMI KALDIRIN

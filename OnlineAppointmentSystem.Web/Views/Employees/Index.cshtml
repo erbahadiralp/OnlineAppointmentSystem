@@ -62,8 +62,8 @@
                                 {
                                     <form asp-action="Deactivate" asp-route-id="@emp.EmployeeId" method="post" class="d-inline">
                                         @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-outline-warning" title="Pasifleştir">
-                                            <i class="bi bi-toggle-off"></i>
+                                        <button type="submit" class="btn btn-outline-success" title="Pasifleştir">
+                                            <i class="bi bi-toggle-on"></i>
                                         </button>
                                     </form>
                                 }
@@ -71,8 +71,8 @@
                                 {
                                     <form asp-action="Activate" asp-route-id="@emp.EmployeeId" method="post" class="d-inline">
                                         @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-outline-success" title="Aktifleştir">
-                                            <i class="bi bi-toggle-on"></i>
+                                        <button type="submit" class="btn btn-outline-warning" title="Aktifleştir">
+                                            <i class="bi bi-toggle-off"></i>
                                         </button>
                                     </form>
                                 }

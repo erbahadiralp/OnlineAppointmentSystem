@@ -1,0 +1,23 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS init
+
+# SQL Server commandline tools'u kur
+RUN apt-get update \
+    && apt-get install -y wget apt-transport-https gnupg \
+    && wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.asc.gpg \
+    && mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/ \
+    && wget -q https://packages.microsoft.com/config/debian/12/prod.list \
+    && mv prod.list /etc/apt/sources.list.d/mssql-release.list \
+    && apt-get update \
+    && ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev \
+    && echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
+
+WORKDIR /init-scripts
+
+COPY init-db.sh ./init-db.sh
+COPY init-db.sql ./init-db.sql
+COPY wait-for-it.sh ./wait-for-it.sh
+
+RUN chmod +x ./init-db.sh
+RUN chmod +x ./wait-for-it.sh
+
+CMD ["./init-db.sh"] 
